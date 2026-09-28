@@ -4,6 +4,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { Hono, type Context } from "hono";
+import { serveStatic } from "@hono/node-server/serve-static";
 import {
   DEFAULT_TEMPLATES_DIR,
   loadPresetRegistry,
@@ -48,6 +49,10 @@ export interface ApiDeps {
   cacheMaxBytes?: number;
   renderConcurrency?: number;
   renderQueueMax?: number;
+  /** playground dist directory (same-origin hosting, route B); when set, the
+   * built Playground is served from this app and the built-in landing page is
+   * replaced by the real frontend */
+  staticRoot?: string;
   /** injectable clock for tests */
   now?: () => number;
   log?: (msg: string) => void;
@@ -364,9 +369,10 @@ export function createApp(deps: ApiDeps) {
     return c.body(new Uint8Array(rendered.bytes), 200, { "Content-Type": rendered.contentType });
   }
 
-
-  app.get("/", (c) => {
-    return c.html(`<!doctype html>
+  if (!deps.staticRoot) {
+    // built-in landing page: only when NOT serving the Playground statically
+    app.get("/", (c) => {
+      return c.html(`<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><title>Erika — Banner API</title>
 <style>body{font-family:system-ui,sans-serif;max-width:880px;margin:48px auto;padding:0 24px;background:#171412;color:#eee}
 code{background:#2a2523;padding:2px 6px;border-radius:4px}a{color:#d9a08a}</style></head>
@@ -378,7 +384,8 @@ GET /v1/banner/:owner/:repo/:template.webp</code></pre>
 <p>示例：<a href="/v1/banner/Moemu/Muika-After-Story.webp">/v1/banner/Moemu/Muika-After-Story.webp</a></p>
 <p>参数：theme / title / description / meta / icon / scale / lang / fresh（见 <a href="/v1/meta">/v1/meta</a> 与 <a href="/doc">/doc</a>）</p>
 </body></html>`);
-  });
+    });
+  }
 
   // minimal static OpenAPI description (full zod-openapi integration deferred)
   app.get("/doc", (c) => {
@@ -416,6 +423,19 @@ GET /v1/banner/:owner/:repo/:template.webp</code></pre>
       },
     });
   });
+
+  // route B same-origin static hosting: the built Playground is served from
+  // this app. Registered LAST so the API routes above keep priority;
+  // extension-less unknown paths fall back to the SPA entry.
+  if (deps.staticRoot) {
+    const spaIndex = readFileSync(join(deps.staticRoot, "index.html"), "utf-8");
+    app.use("*", serveStatic({ root: deps.staticRoot }));
+    app.get("*", (c) => {
+      const pathname = new URL(c.req.url).pathname;
+      if (pathname.includes(".")) return c.text("not found", 404);
+      return c.html(spaIndex);
+    });
+  }
 
   return app;
 }

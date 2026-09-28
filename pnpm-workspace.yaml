@@ -1,5 +1,7 @@
 packages:
   - "packages/*"
   - "apps/*"
+# pnpm 12：依赖构建脚本批准（CI 下未批准会硬报错 ERR_PNPM_IGNORED_BUILDS）
 allowBuilds:
-  esbuild: set this to true or false
+  esbuild: true
+  '@tailwindcss/oxide': true

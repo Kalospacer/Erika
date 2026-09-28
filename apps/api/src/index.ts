@@ -1,5 +1,6 @@
 /** Erika API server entry: env config + wiring. */
 
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { serve } from "@hono/node-server";
 import { createGitHubProvider } from "@erika/providers";
@@ -43,11 +44,17 @@ const provider = createGitHubProvider({
   log: (msg) => console.log(`[provider] ${msg}`),
 });
 
+// route B same-origin hosting: serve the built Playground from this process
+// when its dist exists (always true in the Docker image)
+const playgroundDist = process.env.ERIKA_PLAYGROUND_DIST ??
+  join(REPO_ROOT, "apps", "playground", "dist");
+
 const app = createApp({
   provider,
   templatesDir: process.env.ERIKA_TEMPLATES_DIR,
   presetsPath: process.env.ERIKA_PRESETS_PATH ?? DEFAULT_PRESETS_PATH,
   fontsDir: process.env.ERIKA_FONTS_DIR,
+  staticRoot: existsSync(join(playgroundDist, "index.html")) ? playgroundDist : undefined,
   cacheMaxBytes: process.env.ERIKA_RENDER_CACHE_MB
     ? Number(process.env.ERIKA_RENDER_CACHE_MB) * 1024 * 1024
     : undefined,

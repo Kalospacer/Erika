@@ -1,0 +1,13 @@
+node_modules
+**/node_modules
+dist
+**/dist
+out
+**/out
+work
+.git
+.env
+*.tsbuildinfo
+**/__pycache__
+packages/psd-toolkit
+docs/examples

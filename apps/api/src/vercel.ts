@@ -6,6 +6,7 @@
 
 import { existsSync } from "node:fs";
 import { join } from "node:path";
+import { handle } from "@hono/node-server/vercel";
 import { createApp } from "./app.js";
 import { DEFAULT_PRESETS_PATH, DEFAULT_TEMPLATES_DIR } from "@erika/core";
 import { createGitHubProvider } from "@erika/providers";
@@ -39,3 +40,7 @@ export function createVercelApp(env: VercelEnv = {}) {
   });
 }
 
+/** Vercel's default function export must write to the Node response stream. */
+export function createVercelHandler(env: VercelEnv = {}) {
+  return handle(createVercelApp(env));
+}

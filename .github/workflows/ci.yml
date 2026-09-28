@@ -3,7 +3,11 @@ name: CI
 on:
   push:
     branches: [main]
+    tags: ["v*"]
   pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   test:
@@ -22,4 +26,27 @@ jobs:
 
       - run: pnpm -r build
 
+      - run: pnpm typecheck:vercel
+
       - run: pnpm -r test
+
+      - run: pnpm test:visual
+
+      - run: docker build -t erika:ci .
+
+      - run: node scripts/smoke-docker.mjs erika:ci
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: visual-diffs
+          path: out/visual
+          if-no-files-found: ignore
+
+  image:
+    needs: test
+    if: github.event_name == 'push' && github.repository == 'Moemu/Erika'
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/docker.yml

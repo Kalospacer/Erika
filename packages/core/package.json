@@ -1,5 +1,6 @@
 {
   "name": "@erika/core",
+  "license": "MIT",
   "version": "0.1.0",
   "description": "Erika layout + render engine (pure functions over @napi-rs/canvas)",
   "type": "module",

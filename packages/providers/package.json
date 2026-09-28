@@ -1,5 +1,6 @@
 {
   "name": "@erika/providers",
+  "license": "MIT",
   "version": "0.1.0",
   "description": "Erika DataProviders (GitHub REST with ETag revalidation, SWR, single-flight)",
   "type": "module",

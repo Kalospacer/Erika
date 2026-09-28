@@ -1,5 +1,6 @@
 {
   "name": "erika",
+  "license": "MIT",
   "private": true,
   "description": "Erika（絵里香）——为你的仓库绘制肖像的画师少女 / A banner girl who paints portraits for your repos",
   "packageManager": "pnpm@12.3.4",
@@ -8,7 +9,9 @@
   },
   "scripts": {
     "build": "pnpm -r build",
-    "test": "pnpm -r test",
+    "test": "pnpm -r test && pnpm test:visual",
+    "test:visual": "node scripts/visual-regression.mjs",
+    "visual:update": "node scripts/visual-regression.mjs --update",
     "render:mas": "node packages/cli/dist/cli.js render --template grokbot --data packages/templates/extracted/mas/data.json --preset Moemu/Muika-After-Story --icon packages/templates/assets/muika-icon.webp --out out/mas.webp",
     "render:rikka": "node packages/cli/dist/cli.js render --template grokbot --data packages/templates/extracted/rikka/data.json --preset Moemu/Nonebot-Plugin-Rikka --icon packages/templates/assets/rikka-icon.webp --out out/rikka.webp",
     "dev:api": "pnpm --filter @erika/api dev",

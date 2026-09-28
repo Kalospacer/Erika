@@ -1,5 +1,6 @@
 {
   "name": "@erika/api",
+  "license": "MIT",
   "version": "0.1.0",
   "description": "Erika banner API (Hono)",
   "type": "module",

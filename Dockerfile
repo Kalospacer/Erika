@@ -30,8 +30,7 @@ ENV NODE_ENV=production \
 WORKDIR /app
 
 # pnpm deploy 产物：/out/app = apps/api + 生产依赖（含 @erika/core 等）。
-# REPO_ROOT 由 @erika/core/dist/templates.js 的位置推导为 /app，
-# 因此资源目录按仓库同构布局放置：
+# 资源路径由 ERIKA_* 环境变量指定，不依赖依赖包的安装位置：
 #   /app/packages/templates        模板 + 字体 + 图标资产
 #   /app/apps/api/presets          项目预设
 #   /app/apps/playground/dist      Playground 静态产物（同源托管）
@@ -39,6 +38,7 @@ COPY --from=build /out/app ./
 COPY --from=build /build/packages/templates ./packages/templates
 COPY --from=build /build/apps/api/presets ./apps/api/presets
 COPY --from=build /build/apps/playground/dist ./apps/playground/dist
+COPY LICENSE ASSET-LICENSE.md ./
 
 EXPOSE 8787
 USER node

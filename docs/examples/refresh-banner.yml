@@ -2,7 +2,7 @@
 # 用法：把本文件复制到你自己的仓库 .github/workflows/refresh-banner.yml，
 # 只需修改下方 env 里的 owner/repo 与输出路径。
 #
-# 原理：同时检出你的仓库和 Erika 工具仓库（固定版本），在工具目录里构建
+# 原理：同时检出你的仓库和 Erika 工具仓库，在工具目录里构建
 # CLI，再把生成的 Banner 写回你的仓库。星标无变化时不产生提交。
 # GITHUB_TOKEN 由 Actions 自动提供；如需更高配额可换成 PAT secret。
 
@@ -10,10 +10,10 @@ name: Refresh banner
 
 env:
   ERIKA_REPO: Moemu/erika   # Erika 工具仓库（建议固定到 release tag）
-  ERIKA_REF: main
+  ERIKA_REF: main          # 默认跟随 main；正式使用请固定到验证过的提交 SHA 或 release tag
   BANNER_OWNER: Moemu       # ← 改成你的 owner
   BANNER_REPO: Muika-After-Story   # ← 改成你的 repo
-  BANNER_TEMPLATE: classic-stats   # classic / classic-stats
+  BANNER_TEMPLATE: grokbot   # grokbot / avatar
   BANNER_OUT: assets/banner.webp   # 输出路径（相对你的仓库根）
 
 on:

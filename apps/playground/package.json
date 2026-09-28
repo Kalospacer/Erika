@@ -1,5 +1,6 @@
 {
   "name": "@erika/playground",
+  "license": "MIT",
   "version": "0.1.0",
   "private": true,
   "description": "Erika Playground (React + Vite, Tailwind v4, shadcn-style local components)",

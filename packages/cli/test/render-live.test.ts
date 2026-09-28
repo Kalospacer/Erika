@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { pathToFileURL } from "node:url";
 import { join, resolve } from "node:path";
 import { renderLiveCommand } from "../src/cli.js";
-import { DEFAULT_TEMPLATES_DIR, DEFAULT_PRESETS_PATH } from "@erika/core";
+import { DEFAULT_TEMPLATES_DIR, DEFAULT_PRESETS_PATH, REPO_ROOT } from "@erika/core";
 
 /** 1x1 PNG for the repo-icon chain (decode-validated like any icon source). */
 const TINY_PNG = Buffer.from(
@@ -26,6 +28,29 @@ function gh200() {
 }
 
 describe("render-live", () => {
+  it("runs the Actions example from a separate user's checkout", () => {
+    const workflow = readFileSync(join(REPO_ROOT, "docs/examples/refresh-banner.yml"), "utf8");
+    const setting = (key: string) => {
+      const value = workflow.match(new RegExp(`^  ${key}: ([^ #\\r\\n]+)`, "m"))?.[1];
+      if (!value) throw new Error(`missing workflow setting ${key}`);
+      return value;
+    };
+    const checkout = resolve("out/actions-user-repo");
+    mkdirSync(checkout, { recursive: true });
+    const result = spawnSync(process.execPath, [
+      "--import", pathToFileURL(join(REPO_ROOT, "scripts/fixtures/github.mjs")).href,
+      join(REPO_ROOT, "packages/cli/dist/cli.js"), "render-live",
+      "--owner", setting("BANNER_OWNER"), "--repo", setting("BANNER_REPO"),
+      "--template", setting("BANNER_TEMPLATE"), "--out", setting("BANNER_OUT"),
+    ], {
+      cwd: checkout, encoding: "utf8", timeout: 15000,
+      env: { ...process.env, GITHUB_TOKEN: "fixture", ERIKA_TEMPLATES_DIR: DEFAULT_TEMPLATES_DIR },
+    });
+    expect(result.status, result.stderr).toBe(0);
+    expect(result.stderr).not.toContain("repo icon candidate failed");
+    expect(readFileSync(join(checkout, setting("BANNER_OUT"))).length).toBeGreaterThan(5000);
+  });
+
   it("renders a stranger repo with the repo-icon chain (public interface)", async () => {
     const fetchCalls: string[] = [];
     const fetchImpl = (async (url: string | URL | Request) => {

@@ -19,7 +19,7 @@
 
 - Rikka 的预设布局覆盖（title x/inkTop、description x/top/maxWidth）来自 `Rikka-banner.psd` 实测，与 MAS 不同属设计原样，不是缺陷。
 - 描述行距 1.75 来自 PSD 段落属性实测（AutoLeading 1.75 × 58.33px ≈ 102px；提取器已输出 `paragraphs` 证据），此前反推的固定 100px 已修正。
-- CI 像素 diff 基线（把验收通过的渲染结果固化为基线）在 M4 部署阶段落地。
+- CI 整图像素差异检查已加入，当前基线与更新方法见下方 M4 记录。
 
 ## 2026-09-28 版式比例化回归（M3 修订）
 
@@ -39,3 +39,22 @@
 ## 2026-09-28 版式 v3 附注
 
 模板拆成 `grokbot` / `avatar` 两条路径、元数据改为每模板声明的 topline/footer 两区后，默认渲染会在标题上方多一行仓库全名、描述下方多一行 stars/forks/issues/release（`?meta=` 可整体关闭）。上表的 PSD 对比是对**版式**（文字块与图标盒位）的验收，测量时用 `?meta=` 关掉元数据行即与 PSD 语义对齐；元数据行本身在 PSD 中没有对应物，属新增信息层。
+
+## M4 整图回归与部署检查（2026-09-28）
+
+`tests/visual/baselines/` 固化三张当前版本的 PNG：MAS 自动背景、Rikka 自动背景、
+中文头像亮色模板。输入使用本地图片、固定仓库数据和随包字体（Quicksand / Noto Sans SC），
+不访问网络。已人工查看图文间距、中文显示与元数据位置。它们用于发现后续渲染变化，
+不代表与历史 Photoshop 原稿逐像素一致。
+
+- `pnpm build && pnpm test`：运行功能测试与整图回归。
+- `pnpm test:visual`：单独比较基线。每像素任意通道差值超过 20 即计为变化，
+  变化像素超过整图 0.2% 则失败。尺寸变化直接失败。
+- 失败产物保存在 `out/visual/`，CI 上传原图与粉色标注的差异图。
+- 有意改变版式时执行 `pnpm visual:update`，逐张查看新图后，将基线与对应代码一起提交。
+  CI 不自动更新基线。
+- `node scripts/smoke-docker.mjs erika:local`：启动临时容器，使用固定 GitHub 响应，
+  验证健康检查、静态资源、多级 SPA、API 404、预设图标来源、ETag 与错误占位图；完成后停止容器。
+
+镜像发布由 CI 调用，依赖构建、Vercel 类型检查、功能测试、整图回归与 Docker 冒烟全部成功。
+Vercel 线上冷启动、外部仓库 Actions、Camo 实际刷新与 ghcr 首次发布仍需真实环境验收。

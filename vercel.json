@@ -5,7 +5,7 @@
   "outputDirectory": "apps/playground/dist",
   "functions": {
     "api/index.ts": {
-      "includeFiles": "../packages/templates/**",
+      "includeFiles": "{packages/templates/**,apps/api/presets/**}",
       "maxDuration": 15
     }
   },

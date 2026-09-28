@@ -2,11 +2,11 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
-// base "./" so the built dist works from any static path: API-container
-// same-origin hosting, a subpath, or a static CDN (design doc section 10).
+// Root-relative assets also load when the server falls back from a nested URL.
+// A deployment under a subpath must build with Vite's --base option.
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: "./",
+  base: "/",
   server: {
     port: 5173,
     proxy: {

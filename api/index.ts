@@ -5,6 +5,7 @@
  * validation remains an M4 item (bundle paths, cold start). */
 
 import { handle } from "hono/vercel";
+import { join } from "node:path";
 import { createApp } from "../apps/api/src/app.js";
 import { createGitHubProvider } from "@erika/providers";
 
@@ -18,9 +19,9 @@ export function createVercelApp(
   });
   return createApp({
     provider,
-    templatesDir: process.env.ERIKA_TEMPLATES_DIR,
-    presetsPath: process.env.ERIKA_PRESETS_PATH,
-    fontsDir: process.env.ERIKA_FONTS_DIR,
+    templatesDir: process.env.ERIKA_TEMPLATES_DIR ?? join(process.cwd(), "packages/templates"),
+    presetsPath: process.env.ERIKA_PRESETS_PATH ?? join(process.cwd(), "apps/api/presets/presets.json"),
+    fontsDir: process.env.ERIKA_FONTS_DIR ?? join(process.cwd(), "packages/templates/fonts"),
     log: (msg) => console.log(`[api] ${msg}`),
   });
 }

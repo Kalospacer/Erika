@@ -122,21 +122,14 @@ export interface PresetRegistry {
   path: string;
 }
 
-/** Load the preset registry (repo -> preset). Icon paths resolve against the
- * registry's directory first, then the repo root. */
+/** Icon paths belong to the subject's GitHub repository. Local CLI files are
+ * resolved separately by --icon and must not change these public paths. */
 export function loadPresetRegistry(path = DEFAULT_PRESETS_PATH): PresetRegistry {
-  const raw = readJson(path) as Record<string, Omit<Preset, "icon"> & { icon?: { kind: "asset"; path: string } }>;
-  const dir = dirname(path);
+  const raw = readJson(path) as Record<string, Preset>;
   const map = new Map<string, Preset & { key: string }>();
   for (const [key, entry] of Object.entries(raw)) {
     if (key.startsWith("$")) continue; // $comment etc.
     const preset: Preset & { key: string } = { ...entry, key };
-    if (preset.icon) {
-      const resolveOne = (p: string) =>
-        existsSync(p) ? p : existsSync(join(dir, p)) ? join(dir, p) : resolve(REPO_ROOT, p);
-      if (preset.icon.path) preset.icon.path = resolveOne(preset.icon.path);
-      if (preset.icon.pathLight) preset.icon.pathLight = resolveOne(preset.icon.pathLight);
-    }
     map.set(key.toLowerCase(), preset);
   }
   return { get: (key) => map.get(key.toLowerCase()) ?? null, path };

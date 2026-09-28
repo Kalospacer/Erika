@@ -6,7 +6,7 @@ shields.io 风格的项目 Banner 生成服务。访问一个 URL，自动拉取
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FMoemu%2FErika&project-name=erika&env=GITHUB_TOKEN)
 
-**当前进度：M4（部署与文档）** · 设计文档见 [docs/design.md](docs/design.md) · 渲染验收见 [docs/acceptance.md](docs/acceptance.md)
+**当前进度：M4 本地实现，线上验收待完成** · 设计文档见 [docs/design.md](docs/design.md) · 渲染验收见 [docs/acceptance.md](docs/acceptance.md)
 
 ```text
 erika/
@@ -35,26 +35,41 @@ erika/
 2. 在 Vercel 项目设置中配置 `GITHUB_TOKEN` 环境变量；
 3. 访问 `https://<your-app>.vercel.app/v1/banner/:owner/:repo.webp`。
 
+项目根目录保持仓库根目录。模板、字体和预设通过 `vercel.json` 打包。
+正式用于 README 前，需验证函数产物、冷启动、路由及 GitHub Camo 链路。
+
 ### 路线 B：Docker 自托管
 
 ```bash
-docker build -t erika .
-docker run -d -p 8787:8787 \
-  -e GITHUB_TOKEN=ghp_xxx \
-  -v ./presets:/app/apps/api/presets \
+docker build -t erika:local .
+# 先在当前 shell 中设置 GITHUB_TOKEN
+docker run -d --name erika -p 8787:8787 \
+  -e GITHUB_TOKEN \
   erika:local
 ```
 
-镜像内 Playground 与 API **同源托管**在 `http://localhost:8787`；`./presets`
-卷挂载可热替换项目预设。也发布了预构建镜像：`ghcr.io/moemu/erika`（main 分支
-与 tag 自动构建）。
+镜像内 Playground 与 API **同源托管**在 `http://localhost:8787`，默认使用内置预设。
+自定义预设时，先复制配置，再在启动命令中添加只读挂载：
+
+```bash
+mkdir -p presets
+cp apps/api/presets/presets.json presets/presets.json
+# 添加到 docker run 参数中：
+# --mount type=bind,source="$(pwd)/presets",target=/app/apps/api/presets,readonly
+```
+
+修改预设后执行 `docker restart erika`。预设在启动时读取，不支持热加载。
+向 `Moemu/Erika` 的 main 分支或版本 tag 推送后，CI 检查全部通过才会发布
+`ghcr.io/moemu/erika`；首次成功发布前，该镜像地址不可用。
 
 ### 路线 C：GitHub Actions 定时生成
 
 把 [`docs/examples/refresh-banner.yml`](docs/examples/refresh-banner.yml) 复制到
-你仓库的 `.github/workflows/` 下，改三个环境变量即可：定时调用 `erika
+你仓库的 `.github/workflows/` 下，设置 owner、repo 与输出路径：定时调用 `erika
 render-live` 重新渲染 Banner 并提交到你的仓库——**不需要任何托管服务**，
 星标新鲜度 = cron 粒度；文件无变化时不产生提交。
+默认模板为 `grokbot`。正式使用时将 `ERIKA_REF` 固定到验证过的提交 SHA 或 release tag；
+默认的 `main` 会跟随工具更新。公开仓库的定时任务可能延迟，刷新时间不保证精确到整点。
 
 ## 快速上手（本地开发）
 
@@ -101,17 +116,22 @@ GET /healthz                                       健康检查
 | 参数 | 说明 |
 |------|------|
 | `theme` | 亮/暗主题；**省略 = 自动**（捕获图标背景色作为画布底色，前景按亮度自适应） |
-| `stats` | 元数据徽章字段（`stars` 等），模板需声明 `statsSlot` |
-| `icon` | 图标来源：`preset` / `avatar` / `builtin` |
+| `icon` | 图标来源：`auto` / `avatar` / `builtin`；默认 auto 从目标仓库取图，缺失时使用内置图 |
+| `iconPath` | 目标仓库内的相对路径，如 `assets/grokbot-icon.webp` |
 | `iconFit` / `iconRound` | 展示方式覆盖：contain / cover、圆形 / 方形 |
 | `title` / `description` | 文案覆盖 |
-| `meta` | 元数据字段覆盖（逗号分隔，`none` = 全部隐藏） |
+| `meta` | 元数据字段，逗号分隔；省略使用模板默认值，`meta=` 隐藏全部；字段需由模板声明 |
 | `scale` | 输出缩放（0.1–1，默认 0.5 = 1500×900） |
-| `fresh` | 短缓存 + 强制回源验证 |
+| `lang` | 错误占位图语言：`en` / `zh` |
+| `fresh` | `fresh=1` 强制源站验证 GitHub 数据，返回 `Cache-Control: no-cache` |
 
-错误处理遵循 shields 惯例：仓库不存在或上游故障时返回**占位图**（`X-Banner-Error`
-头携带原因），README 永不破图。响应带 `ETag` 与 `Cache-Control`（`s-maxage=3600`），
-GitHub camo 按其缓存策略自动更新；需要立即刷新可加 `fresh=1`。
+仓库不存在时返回**占位图**，上游故障时优先使用仍可用的旧数据；无可用数据时返回占位图，
+`X-Banner-Error` 携带原因。非法参数返回 400，服务过载可能返回 503。
+正常图片带 `ETag` 与 `Cache-Control`（`s-maxage=3600`）。这是源站的缓存策略，
+不保证 GitHub Camo 一小时内刷新。`fresh=1` 可用于验证源站数据，但不会清除其他 URL 的缓存。
+
+示例：`/v1/banner/Moemu/Muika-After-Story.webp?icon=auto&meta=stars,forks`。
+完整链路验收见 [MAS README 验收步骤](docs/examples/mas-readme-banner.md)。
 
 ## 配置（GitHub Token）
 
@@ -128,8 +148,13 @@ pnpm dev:api              # API / CLI 启动时读取仓库根的 .env；shell �
 
 - 公开模板默认使用 OFL 授权字体（见 `packages/templates/fonts/` 及其 OFL 许可文件）。
 - 若部署者自行持有商业字体（如 Torus SemiBold）许可，可通过 CLI `--fonts-dir` 在运行时从本地路径加载，该字体文件**不进入本仓库与镜像**。
-- `packages/templates/assets` 中的插画与预设绑定的图标为项目自有资产。
+- 内置插画由 OpenAI GPT-Image-2.5 生成。来源、授权范围和用户自备素材的责任见 [素材许可说明](ASSET-LICENSE.md)。
 
 ## 许可
 
-代码 BSD-3-Clause；`packages/templates/assets` 中的插画版权归 Moemu 所有，使用需授权。
+代码、文档及模板配置采用 [MIT](LICENSE)，允许商业使用、修改和再分发，并须保留许可声明。
+内置插画中项目实际持有且有权授权的权利也按 MIT 提供，具体范围见 [素材许可说明](ASSET-LICENSE.md)。
+字体和第三方依赖保留各自许可证；用户提供的素材由用户确认授权并对自身使用行为负责。
+
+提示词来源仅链接至 [Grokbot Icon Studio](https://grokbot-icon-studio.serio-ai.chatgpt.site/zh-hans)，
+本项目不收录或分发其提示词。

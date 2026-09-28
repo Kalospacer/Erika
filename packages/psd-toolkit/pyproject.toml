@@ -1,5 +1,6 @@
 [project]
 name = "erika-psd-toolkit"
+license = {text = "MIT"}
 version = "0.1.0"
 description = "Erika: PSD banner template extractor (dev-time tool, not shipped in production images)"
 requires-python = ">=3.10"

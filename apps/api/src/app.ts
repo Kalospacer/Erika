@@ -403,12 +403,12 @@ GET /v1/banner/:owner/:repo/:template.webp</code></pre>
               { name: "theme", in: "query", schema: { type: "string" } },
               { name: "title", in: "query", schema: { type: "string", maxLength: LIMITS.titleChars } },
               { name: "description", in: "query", schema: { type: "string", maxLength: LIMITS.descriptionChars } },
-              { name: "meta", in: "query", schema: { type: "string", example: "stars,forks,release" } },
+              { name: "meta", in: "query", description: "Comma-separated fields; empty string hides all metadata. Omit to use template defaults.", schema: { type: "string", example: "stars,forks,release" } },
               { name: "icon", in: "query", schema: { enum: ["auto", "avatar", "builtin"] } },
               { name: "iconPath", in: "query", schema: { type: "string", example: "assets/grokbot-icon.webp" } },
               { name: "iconFit", in: "query", schema: { enum: ["contain", "cover"] } },
               { name: "iconRound", in: "query", schema: { enum: ["0", "1"] } },
-              { name: "scale", in: "query", schema: { type: "number", exclusiveMinimum: 0, maximum: 1 } },
+              { name: "scale", in: "query", schema: { type: "number", minimum: LIMITS.scaleMin, maximum: LIMITS.scaleMax } },
               { name: "lang", in: "query", schema: { enum: ["en", "zh"] } },
               { name: "fresh", in: "query", schema: { type: "string", example: "1" } },
             ],
@@ -429,6 +429,8 @@ GET /v1/banner/:owner/:repo/:template.webp</code></pre>
   // extension-less unknown paths fall back to the SPA entry.
   if (deps.staticRoot) {
     const spaIndex = readFileSync(join(deps.staticRoot, "index.html"), "utf-8");
+    app.all("/v1", (c) => c.json({ error: "not found" }, 404));
+    app.all("/v1/*", (c) => c.json({ error: "not found" }, 404));
     app.use("*", serveStatic({ root: deps.staticRoot }));
     app.get("*", (c) => {
       const pathname = new URL(c.req.url).pathname;

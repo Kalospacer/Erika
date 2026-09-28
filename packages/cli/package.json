@@ -1,5 +1,6 @@
 {
   "name": "@erika/cli",
+  "license": "MIT",
   "version": "0.1.0",
   "description": "Erika CLI: render from snapshots (render) or live GitHub data (render-live, for GitHub Actions)",
   "type": "module",

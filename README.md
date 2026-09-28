@@ -1,5 +1,7 @@
 # Erika（絵里香）
 
+![Erika Banner](https://erika-alpha.vercel.app/v1/banner/Moemu/Erika.webp)
+
 > 为你的仓库绘制肖像的画师少女 / A banner girl who paints portraits for your repos
 
 shields.io 风格的项目 Banner 生成服务。访问一个 URL，自动拉取 GitHub 仓库名称、星标数等信息，按模板渲染出 Banner 图片。

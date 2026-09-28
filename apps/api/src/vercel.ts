@@ -4,7 +4,6 @@
  * The provider comes from the package entry (dist) so error-class identity
  * matches the app's instanceof checks. */
 
-import { handle } from "hono/vercel";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { createApp } from "./app.js";
@@ -40,7 +39,3 @@ export function createVercelApp(env: VercelEnv = {}) {
   });
 }
 
-/** hono/vercel 的 handle 接收 Hono 实例（不是 app.fetch）。 */
-export function createVercelHandler(env: VercelEnv = {}) {
-  return handle(createVercelApp(env));
-}

@@ -17,6 +17,13 @@ function gh404() {
   return new Response("{}", { status: 404 });
 }
 
+  it("default handler (fetch-style) keeps the error taxonomy", async () => {
+    const entry = await import("../../../api/index.js");
+    const res = await entry.default(new Request("https://erika.test/v1/banner/No/Such.webp"));
+    expect(res.status).toBe(200);
+    expect(res.headers.get("x-banner-error")).toBe("not-found");
+  });
+
 describe("createVercelApp (route A entry)", () => {
   it("classifies upstream 404 into a placeholder image, not a 500", async () => {
     const app = entry.createVercelApp({ fetchImpl: gh404 });

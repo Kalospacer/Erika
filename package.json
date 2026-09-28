@@ -1,0 +1,24 @@
+{
+  "name": "erika",
+  "private": true,
+  "description": "Erika（絵里香）——为你的仓库绘制肖像的画师少女 / A banner girl who paints portraits for your repos",
+  "packageManager": "pnpm@12.3.4",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "render:mas": "node packages/cli/dist/cli.js render --template grokbot --data packages/templates/extracted/mas/data.json --preset Moemu/Muika-After-Story --icon packages/templates/assets/muika-icon.webp --out out/mas.webp",
+    "render:rikka": "node packages/cli/dist/cli.js render --template grokbot --data packages/templates/extracted/rikka/data.json --preset Moemu/Nonebot-Plugin-Rikka --icon packages/templates/assets/rikka-icon.webp --out out/rikka.webp",
+    "dev:api": "pnpm --filter @erika/api dev",
+    "typecheck:vercel": "tsc -p tsconfig.vercel.json"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "@types/node": "^24.0.0",
+    "@erika/providers": "workspace:*",
+    "@erika/core": "workspace:*",
+    "hono": "^4.6.0"
+  }
+}

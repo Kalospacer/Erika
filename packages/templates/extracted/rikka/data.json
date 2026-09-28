@@ -1,0 +1,9 @@
+{
+  "$comment": "M1 数据快照（模拟 Provider 输出；M2 起由 GitHub Provider 实时获取）。描述文案取自 PSD。",
+  "fullName": "Moemu/Nonebot-Plugin-Rikka",
+  "name": "Nonebot-Plugin-Rikka",
+  "description": "A Nonebot 2 plugin for Maimai, Chunithm\nthat supports updating score probers\n(such as Divingfish & LXNS).",
+  "stargazersCount": 12,
+  "forksCount": 1,
+  "private": false
+}

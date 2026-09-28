@@ -1,0 +1,90 @@
+{
+ "tool": {
+  "name": "erika-psd-toolkit",
+  "version": "0.1.0",
+  "python": "3.12.7",
+  "platform": "Windows-11-10.0.26340-SP0"
+ },
+ "command": "erika-psd extract D:\\Project\\psd\\Rikka-banner.psd --out packages\\templates\\extracted\\rikka",
+ "psd": {
+  "path": "D:\\Project\\psd\\Rikka-banner.psd",
+  "canvas": [
+   3000,
+   1800
+  ],
+  "sha256": "8d8d3cbb463b5a1a"
+ },
+ "supportedLayerKinds": [
+  "pixel",
+  "smartobject",
+  "type",
+  "group",
+  "shape",
+  "adjustment"
+ ],
+ "layers": [
+  {
+   "kind": "pixel",
+   "name": "图层 0",
+   "bbox": [
+    0,
+    0,
+    3000,
+    1800
+   ],
+   "visible": true
+  },
+  {
+   "kind": "smartobject",
+   "name": "file_0000000094c082069223cc3e45449383",
+   "bbox": [
+    264,
+    294,
+    1476,
+    1506
+   ],
+   "visible": false
+  },
+  {
+   "kind": "type",
+   "name": "Nonebot–Plugin–Rikka",
+   "bbox": [
+    1424,
+    695,
+    2763,
+    790
+   ],
+   "visible": true
+  },
+  {
+   "kind": "type",
+   "name": "A Nonebot 2 plugin for Maimai, Chunithm that supports updating ",
+   "bbox": [
+    1430,
+    1010,
+    2760,
+    1267
+   ],
+   "visible": true
+  },
+  {
+   "kind": "smartobject",
+   "name": "银发哥特少女与紫色猫咪玩偶",
+   "bbox": [
+    150,
+    286,
+    1370,
+    1506
+   ],
+   "visible": true
+  }
+ ],
+ "background": {
+  "color": "#0C0C0E",
+  "layer": "图层 0",
+  "uniform": true
+ },
+ "notes": [],
+ "diagnostics": [],
+ "unsupportedEffectsCount": 0
+}

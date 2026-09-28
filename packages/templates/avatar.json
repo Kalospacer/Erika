@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "avatar",
+  "version": 1,
+  "extends": "grokbot",
+  "layout": {
+    "iconCard": { "x": 0.076, "centerY": 0.5, "size": 0.332, "fit": "contain" },
+    "title": { "x": 0.4882, "inkTop": 0.3828 },
+    "description": { "x": 0.4884, "top": 0.5616 },
+    "text": { "rightEdge": 0.9543 }
+  },
+  "slots": {
+    "icon": {
+      "fit": "contain",
+      "radius": 0,
+      "padding": 0,
+      "sources": [
+        "avatar"
+      ],
+      "position": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "_notes": "通用卡片模板：复用 Grokbot 的文字骨架与主题（extends grokbot），但只保留 iconCard 盒——任意不透明图片（GitHub 头像、logo）缩小 + 移动进卡片位，右缘与文字列保持 240px 间距，不参与背景捕获。没有 iconBlend：头像角上的纯色不会重绘画布。",
+  "fontCjk": "Noto Sans SC"
+}

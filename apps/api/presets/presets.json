@@ -1,0 +1,36 @@
+{
+  "$comment": "Erika 项目预设注册表 —— repo 全名 -> 预设。预设只描述「这个项目提供了什么」：主题配色，以及图标在该项目仓库内的相对路径（走公开路径 raw.githubusercontent.com，任何使用者一样）。版式一律来自模板的比例布局（docs/design.md 5.3），预设不携带任何像素值。图标路径留空的仓库会回落到模板的默认 Grokbot 图标。",
+  "Moemu/Muika-After-Story": {
+    "template": "grokbot",
+    "title": "Muika-After-Story",
+    "description": null,
+    "icon": {
+      "path": "assets/grokbot-icon.webp"
+    },
+    "theme": "dark",
+    "themeOverrides": {}
+  },
+  "Moemu/Nonebot-Plugin-Rikka": {
+    "template": "grokbot",
+    "title": "Nonebot–Plugin–Rikka",
+    "description": null,
+    "icon": {
+      "path": "assets/grokbot-icon.webp"
+    },
+    "theme": "dark",
+    "themeOverrides": {
+      "dark": {
+        "background": "#0C0C0E",
+        "title": "#E9E4E9",
+        "accent": "#867FC5",
+        "description": "#999999"
+      },
+      "light": {
+        "background": "#F2F0F5",
+        "title": "#2A2530",
+        "accent": "#6F66B0",
+        "description": "#6B6259"
+      }
+    }
+  }
+}

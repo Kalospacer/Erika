@@ -1,0 +1,28 @@
+{
+  "name": "@erika/api",
+  "version": "0.1.0",
+  "description": "Erika banner API (Hono)",
+  "type": "module",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@erika/core": "workspace:*",
+    "@erika/providers": "workspace:*",
+    "@erika/shared": "workspace:*",
+    "@hono/node-server": "^1.13.0",
+    "hono": "^4.6.0",
+    "zod": "^3.25.0",
+    "@napi-rs/canvas": "^0.1.68"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0"
+  }
+}

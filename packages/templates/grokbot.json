@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "id": "grokbot",
+  "version": 1,
+  "capabilities": {
+    "autoFit": true,
+    "manualLineBreaks": true,
+    "wordInitialAccent": true,
+    "accentRanges": false,
+    "metadata": true
+  },
+  "canvas": {
+    "width": 3000,
+    "height": 1800
+  },
+  "defaults": {
+    "theme": "dark",
+    "scale": 0.5
+  },
+  "layout": {
+    "iconBlend": { "x": 0.069, "centerY": 0.4989, "size": 0.4053, "fit": "cover" },
+    "iconCard": { "x": 0.076, "centerY": 0.5, "size": 0.332, "fit": "contain" },
+    "title": { "x": 0.4882, "inkTop": 0.3828 },
+    "description": { "x": 0.4884, "top": 0.5616 },
+    "text": { "rightEdge": 0.9543 }
+  },
+  "slots": {
+    "title": {
+      "font": "Torus SemiBold",
+      "fontFallback": [
+        "Quicksand",
+        "Baloo 2",
+        "Comfortaa"
+      ],
+      "size": 125.0,
+      "tracking": 0.1,
+      "accentMode": "word-initial",
+      "tokenize": "[-_–—\\s]|[\\u4e00-\\u9fff]",
+      "autoFit": {
+        "mode": "scale-down",
+        "minScale": 0.7
+      },
+      "overflow": "ellipsis"
+    },
+    "description": {
+      "font": "Torus SemiBold",
+      "fontFallback": [
+        "Quicksand",
+        "Baloo 2",
+        "Comfortaa"
+      ],
+      "size": 58.33,
+      "tracking": 0.1,
+      "leading": 1.75,
+      "maxLines": 4,
+      "wrap": "manual-first",
+      "overflow": {
+        "mode": "ellipsis"
+      }
+    },
+    "icon": {
+      "fit": "contain",
+      "radius": 0,
+      "padding": 0,
+      "sources": [
+        "repo",
+        "builtin"
+      ],
+      "position": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "meta": {
+      "size": 56,
+      "tracking": 0.04,
+      "color": "stats",
+      "accent": "accent",
+      "separator": "·",
+      "separatorGap": 0.5,
+      "topline": { "gap": 0.028, "fields": ["full_name"] },
+      "footer": { "gap": 0.055, "fields": ["stars", "forks", "issues", "release"] }
+    }
+  },
+  "themes": {
+    "dark": {
+      "background": "#24201F",
+      "title": "#FFFFFF",
+      "accent": "#AB6B55",
+      "description": "#999999",
+      "stats": "#C4BEB8"
+    },
+    "light": {
+      "background": "#F5F1EC",
+      "title": "#1C1815",
+      "accent": "#9A5A42",
+      "description": "#6B6259",
+      "stats": "#4B443D"
+    }
+  },
+  "fonts": [
+    "Torus-SemiBold.otf",
+    "Baloo2-SemiBold.ttf",
+    "Quicksand-SemiBold.ttf",
+    "Comfortaa-SemiBold.ttf",
+    "NotoSansSC-SemiBold.ttf"
+  ],
+  "_notes": "Grokbot Icon 模板：项目自带（或内置默认）的整幅插画走 iconBlend 比例盒满幅融合，画布底色由右上角采样的背景色决定；iconCard 只是素材底色不纯时的兜底盒。版式比例由 `erika-psd induce` 从 MAS-banner.psd / Rikka-banner.psd 归纳（尺寸/垂直离散 ≤12px，横向 0.05–0.088W 是两样本最松的一项，取均值）。元数据按 topline/footer 声明字段，渲染时锚定文字块而非固定坐标（footer 用墨迹间距：设计里标题→描述的墨迹间距是 0.114H，元数据取一半 0.055H≈99px，避免贴住描述）；字号 56 的依据：README 内容列约 830px，3000px 画布缩放后只剩 27.7%，56×0.277≈15.5px 屏幕字号（与描述 58.33 同档、比正文略小），42 会掉到 11.6px 而难以辨认。",
+  "fontCjk": "Noto Sans SC"
+}

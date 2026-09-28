@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm -r build",
+  "outputDirectory": "apps/playground/dist",
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": "../packages/templates/**",
+      "maxDuration": 15
+    }
+  },
+  "rewrites": [
+    { "source": "/v1/(.*)", "destination": "/api/index" },
+    { "source": "/doc", "destination": "/api/index" },
+    { "source": "/healthz", "destination": "/api/index" }
+  ]
+}

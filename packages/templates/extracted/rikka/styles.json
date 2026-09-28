@@ -1,0 +1,173 @@
+{
+ "psd": "D:\\Project\\psd\\Rikka-banner.psd",
+ "canvas": [
+  3000,
+  1800
+ ],
+ "typeLayers": [
+  {
+   "layerName": "Nonebot–Plugin–Rikka",
+   "text": "Nonebot–Plugin–Rikka",
+   "bbox": [
+    1424,
+    695,
+    2763,
+    790
+   ],
+   "fontsDeclared": [
+    "Torus-SemiBold",
+    "AdobeInvisFont",
+    "AdobeHeitiStd-Regular"
+   ],
+   "transform": [
+    1.33,
+    0.0,
+    0.0,
+    1.33
+   ],
+   "effectiveFontSize": 108.33,
+   "runs": [
+    {
+     "font": 0,
+     "fontSize": 81.45597,
+     "tracking": 100,
+     "fillColor": "#867FC5"
+    },
+    {
+     "font": 0,
+     "fontSize": 81.45597,
+     "tracking": 100,
+     "fillColor": "#E9E4E9"
+    },
+    {
+     "font": 0,
+     "fontSize": 81.45597,
+     "tracking": 100,
+     "fillColor": "#867FC5"
+    },
+    {
+     "font": 0,
+     "fontSize": 81.45597,
+     "tracking": 100,
+     "fillColor": "#E9E4E9"
+    },
+    {
+     "font": 0,
+     "fontSize": 81.45597,
+     "tracking": 100,
+     "fillColor": "#867FC5"
+    },
+    {
+     "font": 0,
+     "fontSize": 81.45597,
+     "tracking": 100,
+     "fillColor": "#E9E4E9"
+    }
+   ],
+   "runLengths": [
+    1,
+    7,
+    1,
+    6,
+    1,
+    5
+   ],
+   "paragraphs": [
+    {
+     "Justification": 0,
+     "Leading": null,
+     "AutoLeading": 1.75,
+     "LeadingType": 1
+    }
+   ],
+   "diagnostics": []
+  },
+  {
+   "layerName": "A Nonebot 2 plugin for Maimai, Chunithm that supports updating ",
+   "text": "A Nonebot 2 plugin for Maimai, Chunithm\rthat supports updating score probers\r(such as Divingfish & LXNS).\r\r",
+   "bbox": [
+    1430,
+    1010,
+    2760,
+    1267
+   ],
+   "fontsDeclared": [
+    "Torus-SemiBold",
+    "AdobeInvisFont",
+    "AdobeHeitiStd-Regular"
+   ],
+   "transform": [
+    1.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "effectiveFontSize": 58.33,
+   "runs": [
+    {
+     "font": 0,
+     "fontSize": 58.33333,
+     "tracking": 100,
+     "fillColor": "#999999"
+    },
+    {
+     "font": 0,
+     "fontSize": 58.33333,
+     "tracking": 100,
+     "fillColor": "#999999"
+    },
+    {
+     "font": 0,
+     "fontSize": 58.33333,
+     "tracking": 100,
+     "fillColor": "#FF6666"
+    },
+    {
+     "font": 0,
+     "fontSize": 58.33333,
+     "tracking": 100,
+     "fillColor": "#999999"
+    }
+   ],
+   "runLengths": [
+    1,
+    1,
+    9,
+    97
+   ],
+   "paragraphs": [
+    {
+     "Justification": 0,
+     "Leading": null,
+     "AutoLeading": 1.75,
+     "LeadingType": 1
+    },
+    {
+     "Justification": 0,
+     "Leading": null,
+     "AutoLeading": 1.75,
+     "LeadingType": 1
+    },
+    {
+     "Justification": 0,
+     "Leading": null,
+     "AutoLeading": 1.75,
+     "LeadingType": 1
+    },
+    {
+     "Justification": 0,
+     "Leading": null,
+     "AutoLeading": 1.75,
+     "LeadingType": 1
+    },
+    {
+     "Justification": 0,
+     "Leading": null,
+     "AutoLeading": 1.75,
+     "LeadingType": 1
+    }
+   ],
+   "diagnostics": []
+  }
+ ]
+}

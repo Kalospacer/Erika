@@ -1,0 +1,199 @@
+{
+ "_comment": "machine-drafted from PSD extraction; hand-tune before finalizing (baseline values are estimates pending calibration)",
+ "canvas": {
+  "width": 3000,
+  "height": 1800
+ },
+ "measured": {
+  "background": "#24201F",
+  "icon": {
+   "bbox": [
+    264,
+    294,
+    1476,
+    1506
+   ],
+   "size": [
+    1212,
+    1212
+   ]
+  },
+  "title": {
+   "layerName": "Muika-After-Story",
+   "text": "Muika-After-Story",
+   "bbox": [
+    1505,
+    683,
+    2779,
+    793
+   ],
+   "fontsDeclared": [
+    "Torus-SemiBold",
+    "AdobeInvisFont",
+    "AdobeHeitiStd-Regular"
+   ],
+   "transform": [
+    1.33,
+    0.0,
+    0.0,
+    1.33
+   ],
+   "effectiveFontSize": 125.0,
+   "runs": [
+    {
+     "font": 0,
+     "fontSize": 93.98766,
+     "tracking": 100,
+     "fillColor": "#AB6B55"
+    },
+    {
+     "font": 0,
+     "fontSize": 93.98766,
+     "tracking": 100,
+     "fillColor": "#FFFFFF"
+    },
+    {
+     "font": 0,
+     "fontSize": 93.98766,
+     "tracking": 100,
+     "fillColor": "#AB6B55"
+    },
+    {
+     "font": 0,
+     "fontSize": 93.98766,
+     "tracking": 100,
+     "fillColor": "#FFFFFF"
+    },
+    {
+     "font": 0,
+     "fontSize": 93.98766,
+     "tracking": 100,
+     "fillColor": "#AB6B55"
+    },
+    {
+     "font": 0,
+     "fontSize": 93.98766,
+     "tracking": 100,
+     "fillColor": "#FFFFFF"
+    }
+   ],
+   "runLengths": [
+    1,
+    5,
+    1,
+    5,
+    1,
+    5
+   ],
+   "paragraphs": [
+    {
+     "Justification": 0,
+     "Leading": null,
+     "AutoLeading": 1.75,
+     "LeadingType": 1
+    }
+   ],
+   "diagnostics": []
+  },
+  "description": {
+   "layerName": "An event-loop Chatbot framework based on an emotional state mac",
+   "text": "An event-loop Chatbot framework\rbased on an emotional state machine,\rwith its character design inspired\rby Monika from Doki Doki Literature Club.\r",
+   "bbox": [
+    1500,
+    1012,
+    2863,
+    1369
+   ],
+   "fontsDeclared": [
+    "Torus-SemiBold",
+    "Torus-SemiBold",
+    "AdobeInvisFont",
+    "AdobeHeitiStd-Regular"
+   ],
+   "transform": [
+    1.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "effectiveFontSize": 58.33,
+   "runs": [
+    {
+     "font": 1,
+     "fontSize": 58.33333,
+     "tracking": 100,
+     "fillColor": "#999999"
+    },
+    {
+     "font": 1,
+     "fontSize": 58.33333,
+     "tracking": 100,
+     "fillColor": "#999999"
+    },
+    {
+     "font": 1,
+     "fontSize": 58.33333,
+     "tracking": 100,
+     "fillColor": "#999999"
+    },
+    {
+     "font": 0,
+     "fontSize": 58.33333,
+     "tracking": 100,
+     "fillColor": "#999999"
+    },
+    {
+     "font": 1,
+     "fontSize": 58.33333,
+     "tracking": 100,
+     "fillColor": "#999999"
+    }
+   ],
+   "runLengths": [
+    1,
+    118,
+    25,
+    2,
+    1
+   ],
+   "paragraphs": [
+    {
+     "Justification": 0,
+     "Leading": null,
+     "AutoLeading": 1.75,
+     "LeadingType": 1
+    },
+    {
+     "Justification": 0,
+     "Leading": null,
+     "AutoLeading": 1.75,
+     "LeadingType": 1
+    },
+    {
+     "Justification": 0,
+     "Leading": null,
+     "AutoLeading": 1.75,
+     "LeadingType": 1
+    },
+    {
+     "Justification": 0,
+     "Leading": null,
+     "AutoLeading": 1.75,
+     "LeadingType": 1
+    },
+    {
+     "Justification": 0,
+     "Leading": null,
+     "AutoLeading": 1.75,
+     "LeadingType": 1
+    }
+   ],
+   "diagnostics": []
+  }
+ },
+ "assumptions": [
+  "title.baselineY estimated from bbox bottom minus descender; needs render calibration",
+  "description.firstBaselineOffset estimated from ascent; needs render calibration",
+  "leading read from paragraph properties when fixed (PSD uses 100px); AutoLeading 1.2 otherwise"
+ ]
+}

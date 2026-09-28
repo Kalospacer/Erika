@@ -1,0 +1,25 @@
+{
+  "name": "@erika/cli",
+  "version": "0.1.0",
+  "description": "Erika CLI: render from snapshots (render) or live GitHub data (render-live, for GitHub Actions)",
+  "type": "module",
+  "bin": {
+    "erika": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@erika/core": "workspace:*",
+    "@erika/providers": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0"
+  }
+}

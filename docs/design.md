@@ -535,7 +535,23 @@ erika/
 | M2 | api 服务：路由、参数、GitHub Provider、缓存、错误分类、`/v1/meta` | **关键链路验收**：同一 README 图片 URL 在仓库数据变化后更新；GitHub 暂时不可用时按既定策略降级显示；MAS、Rikka、陌生仓库三仓库复用通过 |
 | M3 | Playground：预览、调参、片段导出、URL 分享 | 生成片段贴入 README 正常显示，亮暗主题自适应 |
 | M4 | 部署上线 + 文档 + README 替换 | 真实 camo 链路实测数据更新粒度并记录；压测报告补充 |
-| M5（后续） | SVG 输出、`accentRanges` 能力、任意远程图标（含完整受限下载）、更多 Provider、元数据字段扩展（license/language/last-updated 等） | 按需排期 |
+| M5（拆分为 M5.0–M5.5，见下方 M5 提案） | 见 §10.1 后的「M5 提案」 | 分批实施 |
+
+### M5 提案（2026-09-28 排期草案）
+
+M4 上线后图标链路由 preset 重构为 repo-candidate 优先（raw.githubusercontent.com
+钉死 host），据此把 M5 拆为可独立交付的五批：
+
+| 批次 | 内容 | 规模 | 依赖 |
+|------|------|------|------|
+| **M5.0** camo 链路实测（M4 收尾） | 替换 MAS README + 五步验收 | 半小时，零代码 | Vercel 域名（已就绪） |
+| **M5.1** 图标链路修正 + accentRanges | ① preset 解析出的绝对 FS 路径不得拼入 raw base（容器 404 复现）；② 描述强调词能力（Rikka 的 `#FF6666` run，`accentRanges` 槽位声明 + 渲染 color runs） | 小 | 无 |
+| **M5.2** CI 视觉回归 | pixelmatch 基线入库，MAS/Rikka/grokbot-avatar 三原型断言 | 中 | M5.1 |
+| **M5.3** SVG 输出 | 需先 spike：字体子集嵌入（WOFF2 base64） vs 文本转路径；模板渲染路径分叉评估 | 大 | spike 结论 |
+| **M5.4** 更多 Provider | npm / PyPI（DataProvider 接口已就绪，字段映射 + 缓存策略复用） | 中 | 无 |
+| **M5.5** 元数据字段扩展 | license / language / last-updated 等（渲染端 metadata 行系统已由 M4 支持声明式字段） | 小 | 无 |
+
+推荐顺序：M5.0 → M5.1 → M5.2 →（M5.5 与 M5.3 spike 并行）→ M5.3。
 
 M2 的关键链路（数据变化 → 同 URL 更新 → 故障降级）是整个项目从"PSD 排版"升级为"动态 Banner 服务"的完成标志，跑不通则视为 M2 未完成。
 

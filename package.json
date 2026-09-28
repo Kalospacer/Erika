@@ -2,7 +2,7 @@
   "name": "erika",
   "license": "MIT",
   "private": true,
-  "description": "Erika（絵里香）——为你的仓库绘制肖像的画师少女 / A banner girl who paints portraits for your repos",
+  "description": "Erika\uff08\u7d75\u91cc\u9999\uff09\u2014\u2014\u4e3a\u4f60\u7684\u4ed3\u5e93\u7ed8\u5236\u8096\u50cf\u7684\u753b\u5e08\u5c11\u5973 / A banner girl who paints portraits for your repos",
   "packageManager": "pnpm@12.3.4",
   "engines": {
     "node": ">=22"
@@ -22,6 +22,7 @@
     "@types/node": "^24.0.0",
     "@erika/providers": "workspace:*",
     "@erika/core": "workspace:*",
-    "hono": "^4.6.0"
+    "hono": "^4.6.0",
+    "@erika/api": "workspace:*"
   }
 }

@@ -109,6 +109,9 @@ importers:
 
   .:
     devDependencies:
+      '@erika/api':
+        specifier: workspace:*
+        version: link:apps/api
       '@erika/core':
         specifier: workspace:*
         version: link:packages/core

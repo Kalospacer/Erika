@@ -5,7 +5,10 @@
  * matches the app's instanceof checks. */
 
 import { handle } from "hono/vercel";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { createApp } from "./app.js";
+import { DEFAULT_PRESETS_PATH, DEFAULT_TEMPLATES_DIR } from "@erika/core";
 import { createGitHubProvider } from "@erika/providers";
 
 export interface VercelEnv {
@@ -14,19 +17,25 @@ export interface VercelEnv {
   fetchImpl?: typeof fetch;
 }
 
+/** 资产路径解析：环境变量 → cwd 相对（Vercel /var/task）→ core 绝对默认
+ * （仓库 / Docker 布局）。任一命中即返回，保证三种运行形态都能解析。 */
+function resolveAssetPath(envVar: string, cwdRel: string, fallback: string): string {
+  if (process.env[envVar]) return process.env[envVar] as string;
+  if (existsSync(join(process.cwd(), cwdRel))) return join(process.cwd(), cwdRel);
+  return fallback;
+}
+
 export function createVercelApp(env: VercelEnv = {}) {
   const provider = createGitHubProvider({
     token: env.GITHUB_TOKEN ?? env.GH_TOKEN,
     fetchImpl: env.fetchImpl,
     log: (msg: string) => console.log(`[provider] ${msg}`),
   });
-  // Vercel cwd = /var/task；includeFiles 会把仓库同构路径拷入，
-  // 因此这里用 cwd 相对默认值（可用 ERIKA_* 环境变量覆盖）
   return createApp({
     provider,
-    templatesDir: process.env.ERIKA_TEMPLATES_DIR ?? "packages/templates",
-    presetsPath: process.env.ERIKA_PRESETS_PATH ?? "apps/api/presets/presets.json",
-    fontsDir: process.env.ERIKA_FONTS_DIR ?? "packages/templates/fonts",
+    templatesDir: resolveAssetPath("ERIKA_TEMPLATES_DIR", "packages/templates", DEFAULT_TEMPLATES_DIR),
+    presetsPath: resolveAssetPath("ERIKA_PRESETS_PATH", "apps/api/presets/presets.json", DEFAULT_PRESETS_PATH),
+    fontsDir: resolveAssetPath("ERIKA_FONTS_DIR", "packages/templates/fonts", join(DEFAULT_TEMPLATES_DIR, "fonts")),
     log: (msg: string) => console.log(`[api] ${msg}`),
   });
 }

@@ -5,6 +5,9 @@
 
 import { createVercelHandler } from "@erika/api/vercel";
 
+// re-exported so CI tests exercise the exact deployed factory
+export { createVercelApp } from "@erika/api/vercel";
+
 export default createVercelHandler({
   GITHUB_TOKEN: process.env.GITHUB_TOKEN,
   GH_TOKEN: process.env.GH_TOKEN,

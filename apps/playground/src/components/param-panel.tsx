@@ -69,7 +69,7 @@ export function ParamPanel({
           <TextInput
             value={state.repo}
             onChange={(e) => patch({ repo: e.target.value })}
-            placeholder="Muika-After-Story"
+            placeholder="Erika"
             spellCheck={false}
           />
         </Field>
@@ -125,7 +125,7 @@ export function ParamPanel({
               maxLength={limits?.description ?? 180}
               onChange={(e) => patch({ description: e.target.value })}
               rows={3}
-              className="w-full resize-y rounded-lg border border-white/10 bg-black/25 px-2.5 py-1.5 text-sm text-ink-100 placeholder:text-ink-600 transition-colors focus:border-brand-500/70 focus:outline-none focus:ring-1 focus:ring-brand-500/40"
+              className="w-full resize-y rounded-lg border border-ink-700 bg-ink-850 px-2.5 py-1.5 text-sm text-ink-100 placeholder:text-ink-600 transition-colors focus:border-brand-500/70 focus:outline-none focus:ring-1 focus:ring-brand-500/40"
             />
           </Field>
 
@@ -182,12 +182,12 @@ export function ParamPanel({
           <details
             open={advOpen}
             onToggle={(e) => setAdvOpen((e.target as HTMLDetailsElement).open)}
-            className="group rounded-lg border border-white/10 bg-black/20"
+            className="group rounded-lg border border-ink-700 bg-ink-900"
           >
             <summary className="cursor-pointer select-none rounded-md px-2.5 py-2 text-xs text-ink-300 transition-colors hover:text-ink-100">
               高级选项
             </summary>
-            <div className="space-y-3 border-t border-white/10 p-2.5">
+            <div className="space-y-3 border-t border-ink-700 p-2.5">
               <Field label="项目图标路径" hint="仓库内相对路径">
                 <TextInput
                   value={state.iconPath}

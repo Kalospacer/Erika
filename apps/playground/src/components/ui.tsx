@@ -22,7 +22,7 @@ export function Button({
         "focus-visible:outline-2 focus-visible:outline-brand-400 disabled:opacity-50",
         variant === "primary"
           ? "bg-gradient-to-b from-brand-400 to-brand-500 text-ink-950 font-medium shadow-sm hover:brightness-110 active:brightness-95"
-          : "bg-white/5 text-ink-200 border border-white/10 hover:bg-white/10 hover:text-ink-100",
+          : "bg-ink-850 text-ink-200 border border-ink-700 hover:bg-ink-800 hover:text-ink-100",
         className,
       )}
       {...props}
@@ -37,7 +37,7 @@ export function TextInput({
   return (
     <input
       className={cn(
-        "w-full rounded-lg border border-white/10 bg-black/25 px-2.5 py-1.5 text-sm text-ink-100",
+        "w-full rounded-lg border border-ink-700 bg-ink-850 px-2.5 py-1.5 text-sm text-ink-100",
         "placeholder:text-ink-600 transition-colors focus:border-brand-500/70 focus:outline-none focus:ring-1 focus:ring-brand-500/40",
         className,
       )}
@@ -56,7 +56,7 @@ export function Select({
   return (
     <select
       className={cn(
-        "w-full appearance-none rounded-lg border border-white/10 bg-black/25 px-2.5 py-1.5 text-sm text-ink-100",
+        "w-full appearance-none rounded-lg border border-ink-700 bg-ink-850 px-2.5 py-1.5 text-sm text-ink-100",
         "transition-colors focus:border-brand-500/70 focus:outline-none focus:ring-1 focus:ring-brand-500/40",
         className,
       )}
@@ -130,7 +130,7 @@ export function Tabs({
   onChange: (id: string) => void;
 }) {
   return (
-    <div className="flex gap-1 rounded-lg bg-black/25 p-1 border border-white/5" role="tablist">
+    <div className="flex gap-1 rounded-lg bg-ink-850 p-1 border border-ink-700/70" role="tablist">
       {tabs.map((t) => (
         <button
           key={t.id}
@@ -140,7 +140,7 @@ export function Tabs({
           className={cn(
             "flex-1 rounded-md px-2 py-1 text-xs transition-all",
             active === t.id
-              ? "bg-brand-500/25 text-brand-200 shadow-[inset_0_0_0_1px_rgba(193,124,84,0.35)]"
+              ? "bg-brand-500/15 text-brand-600 shadow-[inset_0_0_0_1px_rgba(115,104,140,0.35)]"
               : "text-ink-300 hover:text-ink-100",
           )}
         >
@@ -155,7 +155,7 @@ export function SectionTitle({ children }: { children: ReactNode }) {
   return (
     <div className="flex items-center gap-2 pt-1">
       <span className="blossom text-[0.7em]" />
-      <h3 className="text-xs font-medium tracking-wide text-brand-300">{children}</h3>
+      <h3 className="text-xs font-medium tracking-wide text-brand-600">{children}</h3>
       <span className="h-px flex-1 bg-gradient-to-r from-brand-500/30 to-transparent" />
     </div>
   );

@@ -31,7 +31,7 @@ export function PreviewStage({
   return (
     <div className="space-y-2">
       <div
-        className="overflow-hidden rounded-2xl border shadow-2xl shadow-black/50 transition-colors"
+        className="overflow-hidden rounded-2xl border transition-colors"
         style={{ background: gh.bg, borderColor: gh.border }}
       >
         {/* README 文件视图头 */}
@@ -94,11 +94,11 @@ export function PreviewStage({
           </span>
         )}
         {image?.bannerError && (
-          <span className="rounded-full bg-brand-500/20 px-2 py-0.5 text-brand-200 ring-1 ring-brand-500/40">
+          <span className="rounded-full bg-brand-500/12 px-2 py-0.5 text-brand-600 ring-1 ring-brand-500/30">
             占位图：{bannerErrorLabel(image.bannerError)}
           </span>
         )}
-        {error && <span className="text-red-400">加载失败：{error}</span>}
+        {error && <span className="text-red-600">加载失败：{error}</span>}
       </div>
     </div>
   );

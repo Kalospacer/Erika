@@ -11,7 +11,7 @@ import { Sun, Moon, Maximize2, Minimize2, RotateCcw } from "lucide-react";
 
 const DEFAULT_STATE = {
   owner: "Moemu",
-  repo: "Muika-After-Story",
+  repo: "Erika",
   template: null,
   theme: null,
   title: "",
@@ -105,11 +105,13 @@ export default function App() {
       <main className="min-w-0 flex-1 space-y-4">
         <header className="flex items-center justify-between gap-3">
           <h1 className="flex items-center gap-2.5 text-lg font-semibold">
-            <span className="blossom text-2xl" aria-hidden="true" />
-            <span className="bg-gradient-to-r from-brand-300 to-brand-500 bg-clip-text text-transparent">
-              Erika
-            </span>
-            <span className="text-sm font-normal text-ink-300">（絵里香）· Playground</span>
+            <img
+              src={`${import.meta.env.BASE_URL}icon-192.png`}
+              alt=""
+              aria-hidden="true"
+              className="h-9 w-9 rounded-xl ring-1 ring-brand-500/20"
+            />
+            <span className="text-brand-600">Erika</span>
           </h1>
           <div className="flex items-center gap-2">
             <Button onClick={() => patch({ scheme: state.scheme === "dark" ? "light" : "dark" })}>

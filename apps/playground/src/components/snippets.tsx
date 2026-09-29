@@ -36,7 +36,7 @@ export function Snippets({ state, path }: { state: ParamState; path: string }) {
         onChange={setTab}
       />
       <div className="flex items-start gap-2">
-        <pre className="min-w-0 flex-1 overflow-x-auto rounded-lg border border-white/10 bg-black/30 p-2.5 font-mono text-xs text-ink-300">
+        <pre className="min-w-0 flex-1 overflow-x-auto rounded-lg border border-ink-700 bg-ink-850 p-2.5 font-mono text-xs text-ink-300">
           {content}
         </pre>
         <CopyButton text={content} />

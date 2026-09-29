@@ -18,11 +18,30 @@
     "scale": 0.5
   },
   "layout": {
-    "iconBlend": { "x": 0.069, "centerY": 0.4989, "size": 0.4053, "fit": "cover" },
-    "iconCard": { "x": 0.076, "centerY": 0.5, "size": 0.332, "fit": "contain" },
-    "title": { "x": 0.4882, "inkTop": 0.3828 },
-    "description": { "x": 0.4884, "top": 0.5616 },
-    "text": { "rightEdge": 0.9543 }
+    "iconBlend": {
+      "x": 0.069,
+      "centerY": 0.4989,
+      "size": 0.4053,
+      "fit": "cover"
+    },
+    "iconCard": {
+      "x": 0.076,
+      "centerY": 0.5,
+      "size": 0.332,
+      "fit": "contain"
+    },
+    "title": {
+      "x": 0.4882,
+      "inkTop": 0.3828
+    },
+    "description": {
+      "x": 0.4884,
+      "top": 0.5616,
+      "bottom": 0.889
+    },
+    "text": {
+      "rightEdge": 0.9543
+    }
   },
   "slots": {
     "title": {
@@ -52,10 +71,14 @@
       "size": 58.33,
       "tracking": 0.1,
       "leading": 1.75,
-      "maxLines": 4,
+      "maxLines": 5,
       "wrap": "manual-first",
       "overflow": {
         "mode": "ellipsis"
+      },
+      "autoFit": {
+        "mode": "scale-down",
+        "minScale": 0.6
       }
     },
     "icon": {
@@ -78,8 +101,21 @@
       "accent": "accent",
       "separator": "·",
       "separatorGap": 0.5,
-      "topline": { "gap": 0.028, "fields": ["full_name"] },
-      "footer": { "gap": 0.055, "fields": ["stars", "forks", "issues", "release"] }
+      "topline": {
+        "gap": 0.028,
+        "fields": [
+          "full_name"
+        ]
+      },
+      "footer": {
+        "gap": 0.055,
+        "fields": [
+          "stars",
+          "forks",
+          "issues",
+          "release"
+        ]
+      }
     }
   },
   "themes": {

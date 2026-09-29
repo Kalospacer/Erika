@@ -16,6 +16,7 @@ import {
   type MeasureFn,
 } from "./layout.js";
 import { captureBackgroundColor } from "./icons.js";
+import { descriptionFitSearch } from "./layout.js";
 import { formatNumber } from "./format.js";
 import type {
   BannerData,
@@ -523,25 +524,54 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
         ? preset.description
         : (data.description ?? "");
   let descLastBaseline: number | null = null;
+  let descLastSize = descSlot.size;
   if (description) {
-    const wrap = wrapDescription(description, descSlot, measure);
+    // description autoFit: when the wrapped lines exceed maxLines, the font
+    // scales down within [1.0, minScale] until they fit -- the vertical band
+    // (bandBottom) bounds how far the block may grow, so a long description
+    // renders completely instead of being cut to half its advertised capacity
+    let size = descSlot.size;
+    let wrap = wrapDescription(description, descSlot, measure);
+    const minScale =
+      descSlot.autoFit?.mode === "scale-down" ? (descSlot.autoFit.minScale ?? 0.6) : 1;
+    // 自动缩排判据是「整个文本装进垂直版式带」：字号变小 → 行高变小 →
+    // 版式带能容纳的行数变多。固定 maxLines 作判据是反的（缩字号只会增加
+    // 行数，永远不成立）。
+    if (descSlot.autoFit && descSlot.bandBottom != null && wrap.ellipsized) {
+      const bandLines = (s: number) =>
+        Math.floor((descSlot.bandBottom! - descSlot.top) / (s * descSlot.size * descSlot.leading));
+      for (const s of descriptionFitSearch(descSlot, minScale)) {
+        const cand = {
+          ...descSlot,
+          size: Math.round(descSlot.size * s * 100) / 100,
+          maxLines: bandLines(s),
+        };
+        const w = wrapDescription(description, cand, measure);
+        if (!w.ellipsized) {
+          size = cand.size;
+          wrap = w;
+          break;
+        }
+      }
+    }
     ctx.fillStyle = colors.description;
     const firstBaseline =
       descSlot.top +
-      (descSlot.firstBaselineOffset ?? inkAscent(ctx, family, descSlot.size, "Akd"));
+      (descSlot.firstBaselineOffset ?? inkAscent(ctx, family, size, "Akd"));
     wrap.lines.forEach((line, i) => {
       drawTextRouted(
         ctx,
         line,
         descSlot.x,
-        firstBaseline + i * descSlot.leading * descSlot.size,
-        descSlot.size,
+        firstBaseline + i * descSlot.leading * size,
+        size,
         descSlot.tracking,
         router,
         letterSpacingOk,
       );
     });
-    descLastBaseline = firstBaseline + (wrap.lines.length - 1) * descSlot.leading * descSlot.size;
+    descLastBaseline = firstBaseline + (wrap.lines.length - 1) * size * descSlot.leading;
+    descLastSize = size;
   }
 
   // metadata rows: anchored to the text block (topline above the title, footer
@@ -571,7 +601,7 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
       // baseline-relative gap made the row hug the description)
       const descInkBottom =
         descLastBaseline !== null
-          ? descLastBaseline + inkDescent(ctx, family, descSlot.size)
+          ? descLastBaseline + inkDescent(ctx, family, descLastSize)
           : descSlot.top + descSlot.size;
       const metaInkTop = inkAscent(ctx, family, metaSlot.size, "Mk");
       drawMetaRow(

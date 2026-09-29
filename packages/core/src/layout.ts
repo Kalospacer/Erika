@@ -129,6 +129,46 @@ export interface WrapResult {
   ellipsized: boolean;
 }
 
+export interface DescFitResult {
+  /** 建议字号（绝对 px） */
+  size: number;
+  /** 相对 slot.size 的缩放 */
+  scale: number;
+  /** true = 缩到 minScale 仍放不下全部文案（渲染时将省略） */
+  ellipsized: boolean;
+}
+
+/** 描述容量估算（供 /v1/meta 宣传真实上限）：垂直版式带驱动行数，
+ * 行数 × 平均字宽容量的最大值（按 minScale）。 */
+export function estimateDescriptionCapacity(
+  slot: DescriptionSlot,
+  measure: MeasureFn,
+): number {
+  const minScale = slot.autoFit?.mode === "scale-down" ? (slot.autoFit.minScale ?? 0.6) : 1;
+  const bandHeight =
+    slot.bandBottom != null ? Math.max(0, slot.bandBottom - slot.top) : Infinity;
+  const avgW =
+    measure("An event-loop Chatbot framework", slot.size, slot.tracking) /
+    "An event-loop Chatbot framework".length;
+  const lineHeight = slot.size * slot.leading;
+  const lines = Math.max(1, Math.floor(bandHeight / lineHeight));
+  const charsPerLine = Math.max(1, Math.floor(slot.maxWidth / avgW));
+  return lines * charsPerLine;
+}
+
+/** 描述自动缩排搜索：从 1.0 起按步长下探，返回能容纳 text 的最大字号
+ * （供渲染端以真实 wrap 验证后采用）。 */
+export function descriptionFitSearch(
+  slot: DescriptionSlot,
+  minScale: number,
+): Array<number> {
+  const scales: number[] = [];
+  for (let s = 1; s >= minScale - 1e-9; s = Math.round((s - 0.04) * 100) / 100) {
+    scales.push(s);
+  }
+  return scales;
+}
+
 /** manual-first: keep explicit line breaks, wrap overlong lines greedily on
  * spaces (char-level binary search as bound), clamp to maxLines with ellipsis. */
 export function wrapDescription(
@@ -193,3 +233,4 @@ export function wrapDescription(
 
   return { lines, ellipsized };
 }
+

@@ -45,6 +45,9 @@ function resolveLayout(tpl: Template): Template {
   if (layout.description) {
     description.x = Math.round(layout.description.x * W);
     description.top = Math.round(layout.description.top * H);
+    if (layout.description.bottom != null) {
+      description.bandBottom = Math.round(layout.description.bottom * H);
+    }
   }
   if (layout.text) {
     if (layout.title) title.maxWidth = Math.round((layout.text.rightEdge - layout.title.x) * W);

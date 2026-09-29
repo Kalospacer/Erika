@@ -5,7 +5,7 @@
     "title": "Muika-After-Story",
     "description": null,
     "icon": {
-      "path": "assets/grokbot-icon.webp"
+      "path": "assets/muika-icon.webp"
     },
     "theme": "dark",
     "themeOverrides": {}

@@ -1,5 +1,5 @@
 <div align="center">
-  <img width="100%" src="https://erika-alpha.vercel.app/v1/banner/Moemu/Erika.webp" alt="Erika Banner" />
+  <img width="100%" src="https://erika.snowy.moe/v1/banner/Moemu/Erika.webp" alt="Erika Banner" />
   <h1>Erika（絵里香）</h1>
   <i>A banner girl who paints portraits for your repos.</i>
 </div>
@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="https://erika-alpha.vercel.app/">🎨 在线预览</a> ·
+  <a href="https://erika.snowy.moe/">🎨 在线预览</a> ·
   <a href="#快速开始">🚀 快速开始</a> ·
   <a href="#部署">📦 部署指南</a> ·
   <a href="#api">📖 API</a>
@@ -34,12 +34,12 @@ Erika 是一个为 GitHub 仓库生成 Banner 的服务。她把项目插画、�
 
 ## 快速开始🚀
 
-打开 [Playground](https://erika-alpha.vercel.app/)，填写仓库的 Owner 和 Repo，调整图标、文字及主题，然后复制页面生成的 Markdown。
+打开 [Playground](https://erika.snowy.moe/)，填写仓库的 Owner 和 Repo，调整图标、文字及主题，然后复制页面生成的 Markdown。
 
 也可以直接把下面的内容放进 README，将 `Moemu/Erika` 替换为你的公开仓库：
 
 ```markdown
-![项目 Banner](https://erika-alpha.vercel.app/v1/banner/Moemu/Erika.webp)
+![项目 Banner](https://erika.snowy.moe/v1/banner/Moemu/Erika.webp)
 ```
 
 如果使用自己部署的服务，将域名替换为你的服务地址即可。
@@ -95,7 +95,7 @@ assets/grokbot-icon.jpg
 默认使用 `grokbot`；设置 `icon=avatar` 时自动使用 `avatar`。也可以在 URL 中指定模板：
 
 ```text
-https://erika-alpha.vercel.app/v1/banner/Moemu/Erika/avatar.webp?icon=avatar
+https://erika.snowy.moe/v1/banner/Moemu/Erika/avatar.webp?icon=avatar
 ```
 
 ### 文字与仓库信息
@@ -105,10 +105,12 @@ https://erika-alpha.vercel.app/v1/banner/Moemu/Erika/avatar.webp?icon=avatar
 `meta` 控制显示哪些仓库信息。例如，只保留星标和最新 Release：
 
 ```text
-https://erika-alpha.vercel.app/v1/banner/Moemu/Erika.webp?meta=stars,release
+https://erika.snowy.moe/v1/banner/Moemu/Erika.webp?meta=stars,release
 ```
 
 省略 `meta` 使用模板默认字段；写成 `?meta=` 则隐藏全部仓库信息字段。
+
+描述里可以用 `**…**` 标记一段强调文字：成对出现时该段用主题的强调色绘制，标记本身不参与排版度量（不占宽度、不影响换行与自动缩排）；落单的 `**` 按字面输出。例如 `?description=An **event-loop** chatbot`。
 
 ## 部署📦
 

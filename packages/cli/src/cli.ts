@@ -178,7 +178,7 @@ export async function renderLiveCommand(
     ? { kind: "repo" as const, buffer: iconBuffer }
     : await resolveIconChain(["repo", "builtin"], {
         repoIconUrls,
-        builtinPath: join(deps.templatesDir, "assets", "grokbot-default.webp"),
+        builtinPath: join(deps.templatesDir, "assets", "erika.webp"),
         imageFetcher: createImageFetcher({ fetchImpl: options.avatarFetchImpl }),
         log: (msg) => console.error(`[icons] ${msg}`),
       });

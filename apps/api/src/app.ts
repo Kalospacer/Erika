@@ -86,7 +86,7 @@ export function createApp(deps: ApiDeps) {
   const templatesDir = deps.templatesDir ?? DEFAULT_TEMPLATES_DIR;
   const presetsPath = deps.presetsPath ?? join(templatesDir, "..", "..", "apps", "api", "presets", "presets.json");
   const fontsDir = deps.fontsDir ?? join(templatesDir, "fonts");
-  const builtinIconPath = deps.builtinIconPath ?? join(templatesDir, "assets", "grokbot-default.webp");
+  const builtinIconPath = deps.builtinIconPath ?? join(templatesDir, "assets", "erika.webp");
   // the default icon's *content* is part of the render cache key: replacing the
   // asset must invalidate cached renders (a constant "builtin" fingerprint would
   // keep serving the old artwork until the LRU evicted it)
@@ -385,7 +385,7 @@ code{background:#2a2523;padding:2px 6px;border-radius:4px}a{color:#d9a08a}</styl
 <h2>用法</h2>
 <pre><code>GET /v1/banner/:owner/:repo.webp
 GET /v1/banner/:owner/:repo/:template.webp</code></pre>
-<p>示例：<a href="/v1/banner/Moemu/Muika-After-Story.webp">/v1/banner/Moemu/Muika-After-Story.webp</a></p>
+<p>示例：<a href="/v1/banner/Moemu/Erika.webp">/v1/banner/Moemu/Erika.webp</a></p>
 <p>参数：theme / title / description / meta / icon / scale / lang / fresh（见 <a href="/v1/meta">/v1/meta</a> 与 <a href="/doc">/doc</a>）</p>
 </body></html>`);
     });

@@ -1,0 +1,14 @@
+{
+  "name": "Erika Playground",
+  "short_name": "Erika",
+  "description": "为你的仓库绘制肖像的画师少女 / A banner girl who paints portraits for your repos",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#73688c",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

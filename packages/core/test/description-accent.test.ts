@@ -21,8 +21,8 @@ async function render(description: string): Promise<Buffer> {
   return (
     await renderBanner({
       template: loadTemplate("grokbot", DEFAULT_TEMPLATES_DIR),
-      data: { fullName: "Moemu/Muika-After-Story", name: "Muika-After-Story", description: null, private: false },
-      iconOverride: { kind: "builtin", buffer: readFileSync(join(DEFAULT_TEMPLATES_DIR, "assets", "grokbot-default.webp")) },
+      data: { fullName: "Moemu/Erika", name: "Erika", description: null, private: false },
+      iconOverride: { kind: "builtin", buffer: readFileSync(join(DEFAULT_TEMPLATES_DIR, "assets", "erika.webp")) },
       fontDirs: FONT_DIRS,
       format: "png",
       params: { scale: 0.5, bgCapture: false, description },

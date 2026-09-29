@@ -1,9 +1,0 @@
-{
-  "$comment": "M1 数据快照（模拟 Provider 输出；M2 起由 GitHub Provider 实时获取）。描述文案取自 PSD 以保证视觉验收一致性。",
-  "fullName": "Moemu/Muika-After-Story",
-  "name": "Muika-After-Story",
-  "description": "An event-loop Chatbot framework\nbased on an emotional state machine,\nwith its character design inspired\nby Monika from Doki Doki Literature Club.",
-  "stargazersCount": 9,
-  "forksCount": 1,
-  "private": false
-}

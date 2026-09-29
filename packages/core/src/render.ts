@@ -556,13 +556,24 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
   if (description) {
     // description autoFit（象限规范的释放阀）：描述必须装进自己的子带
     // [descInkTop, descBandBottom]，装不下时字号在 [1.0, minScale] 内下探，
-    // 直到整个文本都在带内——300 字承诺由此兑现。仍放不下（触底）才省略。
+    // 直到整个文本都在带内——LIMITS.descriptionChars 的容量承诺由此兑现。
+    // 仍放不下（触底）才省略。
+    // 几何一律走基线：首行基线 = 墨顶 + 升部，末行墨底 = 基线 + 降部；
+    // 与页脚守卫用的是同一套量，两者不会互相打架。
+    const descBaseline = (s: number) => descInkTop + inkAscent(ctx, family, s * descSlot.size, "Akd");
+    const descLineHeight = (s: number) => s * descSlot.size * descSlot.leading;
+    const descInkBottom = (lines: number, s: number) =>
+      descBaseline(s) + (lines - 1) * descLineHeight(s) + inkDescent(ctx, family, s * descSlot.size);
     const descBandLines = (s: number) =>
-      Math.max(1, Math.floor((descBandBottom - descInkTop) / (s * descSlot.size * descSlot.leading)));
+      Math.max(
+        1,
+        Math.floor(
+          (descBandBottom - descBaseline(s) - inkDescent(ctx, family, s * descSlot.size)) /
+            descLineHeight(s),
+        ) + 1,
+      );
     const fitsBand = (w: { lines: string[] }, s: number): boolean =>
-      descInkTop + (w.lines.length - 1) * s * descSlot.size * descSlot.leading +
-        inkDescent(ctx, family, s * descSlot.size) <=
-      descBandBottom;
+      descInkBottom(w.lines.length, s) <= descBandBottom;
 
     let size = descSlot.size;
     let wrap = wrapDescription(description, descSlot, measure);
@@ -603,18 +614,23 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
     descLastSize = size;
   }
 
-  // metadata rows: topline hangs above the title (its position is unaffected);
-  // the footer sits in the reserved band-bottom zone and is skipped when it
+  // metadata rows: the topline (Repo Name) is ink-centered in the quarter above
+  // the 25% divider, so the divider really separates it from the title (Project
+  // Name) below; the title's position never depends on the topline's presence.
+  // The footer sits in the reserved band-bottom zone and is skipped when it
   // would overflow (the description has priority over the metadata row)
   if (metaSlot && metaFields.length > 0) {
     if (metaSlot.topline && metaSlot.topline.fields.length > 0) {
-      const anchor = titleInkTop;
+      const toplineCenter = (bandTop + divider) / 2;
+      const toplineBaseline =
+        toplineCenter +
+        (inkAscent(ctx, family, metaSlot.size, "Mk") - inkDescent(ctx, family, metaSlot.size)) / 2;
       drawMetaRow(
         ctx,
         metaSlot,
         metaSlot.topline.fields.filter((f) => metaFields.includes(f)),
         titleSlot.x,
-        anchor - metaSlot.topline.gap * canvasH,
+        toplineBaseline,
         data,
         colors,
         router,

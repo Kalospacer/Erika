@@ -103,12 +103,15 @@ export interface RatioLayout {
   text?: { rightEdge: number };
 }
 
-/** A metadata zone: fields render in a row, anchored to the text block (not to
- * a fixed coordinate), so a short description never leaves a hole. */
-export interface MetaZone {
-  /** gap from the anchor, ratio of canvas height:
-   * topline -- above the title ink top; footer -- below the description's last
-   * baseline */
+/** The repo-name row. Its position comes from the quadrant rules (centred in
+ * the quarter above the 25% divider), so it carries no gap knob. */
+export interface MetaTopline {
+  fields: MetaField[];
+}
+
+/** The stats row: anchored below the description's ink bottom by an ink gap
+ * (ratio of canvas height), so a short description never leaves a hole. */
+export interface MetaFooter {
   gap: number;
   fields: MetaField[];
 }
@@ -125,8 +128,8 @@ export interface MetaSlot {
   separator: string;
   /** separator gap, ratio of the glyph size */
   separatorGap: number;
-  topline?: MetaZone;
-  footer?: MetaZone;
+  topline?: MetaTopline;
+  footer?: MetaFooter;
 }
 
 export interface ThemeColors {

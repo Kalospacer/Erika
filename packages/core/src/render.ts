@@ -271,7 +271,7 @@ function drawMetaRow(
   letterSpacingOk: boolean,
 ): void {
   const size = slot.size;
-  const segments: Array<{ text: string; glyph?: "star" | "fork" | "issue" }> = [];
+  const segments: Array<{ text: string; glyph?: "star" | "fork" | "issue" | "tag" }> = [];
   for (const field of fields) {
     if (field === "stars" && data.stargazersCount != null) {
       segments.push({ text: formatNumber(data.stargazersCount), glyph: "star" });
@@ -280,7 +280,7 @@ function drawMetaRow(
     } else if (field === "issues" && data.openIssuesCount != null) {
       segments.push({ text: formatNumber(data.openIssuesCount), glyph: "issue" });
     } else if (field === "release" && data.releaseTag) {
-      segments.push({ text: data.releaseTag });
+      segments.push({ text: data.releaseTag, glyph: "tag" });
     } else if (field === "full_name" && data.fullName) {
       segments.push({ text: data.fullName });
     }
@@ -301,6 +301,7 @@ function drawMetaRow(
       ctx.fillStyle = colors[slot.accent] ?? colors.accent;
       if (segment.glyph === "star") drawStar(ctx, cursor + r, glyphCy, r);
       else if (segment.glyph === "fork") drawFork(ctx, cursor + r, glyphCy, r);
+      else if (segment.glyph === "tag") drawTag(ctx, cursor + r, glyphCy, r);
       else drawIssue(ctx, cursor + r, glyphCy, r);
       cursor += r * 2 + size * 0.18;
     }
@@ -309,6 +310,34 @@ function drawMetaRow(
       ctx, segment.text, cursor, baseline, size, slot.tracking, router, letterSpacingOk,
     );
   });
+}
+
+/** Price-tag glyph for the release field: a slim tag with a round tip and a
+ * punched hole near the flat end (proportions follow the Octicons/Lucide tag),
+ * filled in the accent colour like the other meta glyphs. */
+function drawTag(ctx: Ctx, cx: number, cy: number, r: number): void {
+  const len = r * 2.0; // length along the tag axis (~2.2x the width)
+  const width = r * 0.9; // across the tag
+  const cap = width / 2; // round tip radius
+  const corner = r * 0.2; // flat-end corner rounding
+  const holeR = r * 0.26;
+  const holeX = -len / 2 + r * 0.52;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(-Math.PI / 4); // hole end lower-left, tip upper-right
+  ctx.beginPath();
+  ctx.moveTo(len / 2 - cap, -width / 2);
+  ctx.lineTo(-len / 2 + corner, -width / 2);
+  ctx.arcTo(-len / 2, -width / 2, -len / 2, -width / 2 + corner, corner);
+  ctx.lineTo(-len / 2, width / 2 - corner);
+  ctx.arcTo(-len / 2, width / 2, -len / 2 + corner, width / 2, corner);
+  ctx.lineTo(len / 2 - cap, width / 2);
+  ctx.arc(len / 2 - cap, 0, cap, Math.PI / 2, -Math.PI / 2, true);
+  ctx.closePath();
+  // punched hole: even-odd fill ignores the winding, so one subpath is enough
+  ctx.arc(holeX, 0, holeR, 0, Math.PI * 2);
+  ctx.fill("evenodd");
+  ctx.restore();
 }
 
 /** Cap height (ink ascent of "M") for the resolved family at a given size. */

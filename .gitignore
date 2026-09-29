@@ -17,3 +17,4 @@ docs/design.md
 docs/acceptance.md
 docs/examples/mas-readme-banner.md
 packages/core/scripts/render-theme.cjs
+/*.webp

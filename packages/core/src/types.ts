@@ -42,6 +42,10 @@ export interface DescriptionSlot {
   firstBaselineOffset?: number;
   wrap?: "manual-first";
   overflow?: { mode: "ellipsis" };
+  /** 垂直版式带底（canvas px）：描述自动缩排的可用带下限。 */
+  bandBottom?: number;
+  /** 描述自动缩排：文案超出 maxLines 时字号在 [1.0, minScale] 内下探。 */
+  autoFit?: { mode: "scale-down"; minScale: number };
 }
 
 /** Absolute icon box inside the canvas (canvas units). */
@@ -94,7 +98,7 @@ export interface RatioLayout {
   /** generic card box for any opaque image (avatars): keeps the text gap */
   iconCard?: RatioIconBox;
   title?: { x: number; inkTop: number };
-  description?: { x: number; top: number };
+  description?: { x: number; top: number; bottom?: number };
   /** text column right edge / canvas width -- maxWidth = rightEdge - x */
   text?: { rightEdge: number };
 }

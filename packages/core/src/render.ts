@@ -36,6 +36,10 @@ type Ctx = ReturnType<ReturnType<typeof createCanvas>["getContext"]>;
 
 const FONT_EXTS = new Set([".ttf", ".otf", ".woff", ".woff2"]);
 const registeredAliases = new Set<string>();
+/** Ink gap between the repo-name row and the title's ink top, as a ratio of
+ * canvas height: the row is a label ON the title (one unit), not a block of
+ * its own. */
+const TOPLINE_INK_GAP = 0.022;
 
 /** Register every font file in the given dirs; alias = filename stem.
  * Idempotent per alias -- safe to call on every request. */
@@ -614,17 +618,16 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
     descLastSize = size;
   }
 
-  // metadata rows: the topline (Repo Name) is ink-centered in the quarter above
-  // the 25% divider, so the divider really separates it from the title (Project
-  // Name) below; the title's position never depends on the topline's presence.
-  // The footer sits in the reserved band-bottom zone and is skipped when it
-  // would overflow (the description has priority over the metadata row)
+  // metadata rows: the topline (Repo Name) hugs the title's ink top -- the two
+  // read as ONE unit (Project Name / Repo Name), so the 25% divider lands just
+  // above the pair instead of splitting them apart; the title's position never
+  // depends on the topline's presence. The footer sits in the reserved
+  // band-bottom zone and is skipped when it would overflow (the description has
+  // priority over the metadata row)
   if (metaSlot && metaFields.length > 0) {
     if (metaSlot.topline && metaSlot.topline.fields.length > 0) {
-      const toplineCenter = (bandTop + divider) / 2;
       const toplineBaseline =
-        toplineCenter +
-        (inkAscent(ctx, family, metaSlot.size, "Mk") - inkDescent(ctx, family, metaSlot.size)) / 2;
+        titleInkTop - TOPLINE_INK_GAP * canvasH - inkDescent(ctx, family, metaSlot.size);
       drawMetaRow(
         ctx,
         metaSlot,

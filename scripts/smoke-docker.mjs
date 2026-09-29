@@ -28,7 +28,7 @@ try {
     const page = new URL(path, origin);
     const response = await fetch(page);
     assert.equal(response.status, 200);
-    const assets = [...(await response.text()).matchAll(/(?:src|href)="([^"]+\.(?:js|css|svg))"/g)];
+    const assets = [...(await response.text()).matchAll(/(?:src|href)="([^"]+\.(?:js|css|svg|png|ico|webmanifest))"/g)];
     assert(assets.length >= 3, "missing built assets");
     for (const [, asset] of assets) {
       const result = await fetch(new URL(asset, page));

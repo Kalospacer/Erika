@@ -14,7 +14,9 @@ globalThis.fetch = async (input) => {
       private: false, stargazers_count: 42, forks_count: 3, open_issues_count: 2,
     }, { headers: { etag: '"fixture-v1"' } });
   }
-  if (url.href === "https://raw.githubusercontent.com/Moemu/Muika-After-Story/main/assets/grokbot-icon.webp") {
+  // pinned exactly: the preset's declared path is part of the public contract,
+  // so a wrong URL must fail instead of being accepted by the fixture
+  if (url.href === "https://raw.githubusercontent.com/Moemu/Muika-After-Story/main/assets/muika-icon.webp") {
     return new Response(readFileSync(join(process.env.ERIKA_TEMPLATES_DIR, "assets/muika-icon.webp")));
   }
   return new Response("fixture has no such resource", { status: 404 });

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { REPO_ROOT, DEFAULT_TEMPLATES_DIR } from "@erika/core";
+import { REPO_ROOT, DEFAULT_TEMPLATES_DIR, DEFAULT_PRESETS_PATH, loadPresetRegistry } from "@erika/core";
 import { createApp } from "../src/app.js";
 
 function app(imageFetcher?: (url: string) => Promise<Buffer>) {
@@ -26,10 +26,13 @@ function app(imageFetcher?: (url: string) => Promise<Buffer>) {
 
 describe("deployed assets and documented API", () => {
   it.each(["Muika-After-Story", "Nonebot-Plugin-Rikka"])("fetches %s's preset from its public repo path", async (repo) => {
+    // the preset's declared path is the contract; expect exactly that URL
+    const declared = loadPresetRegistry(DEFAULT_PRESETS_PATH).get(`Moemu/${repo}`)?.icon?.path;
+    expect(declared, `Moemu/${repo} declares an icon path`).toBeTruthy();
     const urls: string[] = [];
     const server = app(async (url) => {
       urls.push(url);
-      expect(url).toBe(`https://raw.githubusercontent.com/Moemu/${repo}/main/assets/grokbot-icon.webp`);
+      expect(url).toBe(`https://raw.githubusercontent.com/Moemu/${repo}/main/${declared}`);
       return readFileSync(join(DEFAULT_TEMPLATES_DIR, "assets/muika-icon.webp"));
     });
     const response = await server.request(`/v1/banner/Moemu/${repo}.webp?meta=`);

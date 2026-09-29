@@ -162,12 +162,12 @@ export function readBuiltinIcon(path: string): Buffer | null {
   }
 }
 
-// ---- background colour capture (the Muika-PSD technique, automated) ----
+// ---- background colour capture (the PSD technique, automated) ----
 // Grokbot-style icons are full-bleed artworks whose top-right corner stays
 // blank; the original PSDs simply painted the canvas with that backdrop colour.
 // Sampling that corner region (rather than the whole border) is what makes the
 // shipped artworks work: their left edge carries the character, so a
-// border-wide sampler always fails on them (measured on the MAS/Rikka sources).
+// border-wide sampler always fails on them (measured on the shipped sources).
 // Transparent or non-uniform corners -> null, and the icon falls back to the
 // card archetype with its guaranteed gap.
 

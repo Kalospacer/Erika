@@ -12,9 +12,9 @@ function ghResponse(body: unknown, headers: Record<string, string> = {}, status 
 
 function repoBody(overrides: Record<string, unknown> = {}) {
   return {
-    full_name: "Moemu/Muika-After-Story",
-    name: "Muika-After-Story",
-    description: "An event-loop chatbot framework",
+    full_name: "Moemu/Erika",
+    name: "Erika",
+    description: "A URL-driven banner service",
     stargazers_count: 9,
     forks_count: 1,
     private: false,
@@ -54,10 +54,10 @@ describe("createGitHubProvider", () => {
       }) as unknown as typeof fetch,
     });
 
-    const first = await provider.getRepo("Moemu", "Muika-After-Story");
+    const first = await provider.getRepo("Moemu", "Erika");
     expect(first.data.stargazersCount).toBe(9);
-    await provider.getRepo("Moemu", "Muika-After-Story"); // revalidate -> 304, stays fresh
-    const third = await provider.getRepo("Moemu", "Muika-After-Story");
+    await provider.getRepo("Moemu", "Erika"); // revalidate -> 304, stays fresh
+    const third = await provider.getRepo("Moemu", "Erika");
 
     expect(seen[0].auth).toBe("Bearer ghp_secret_value");
     expect(seen[0].inm).toBeNull();
@@ -73,7 +73,7 @@ describe("createGitHubProvider", () => {
         return ghResponse(repoBody());
       }) as unknown as typeof fetch,
     });
-    await provider.getRepo("Moemu", "Muika-After-Story");
+    await provider.getRepo("Moemu", "Erika");
     expect(auth).toBeNull();
   });
 
@@ -101,14 +101,14 @@ describe("createGitHubProvider", () => {
         return ghResponse(repoBody(), { etag: '"abc"' });
       },
     });
-    const snap = await provider.getRepo("Moemu", "Muika-After-Story");
+    const snap = await provider.getRepo("Moemu", "Erika");
     expect(snap.freshness).toBe("fresh");
     expect(snap.data.stargazersCount).toBe(9);
     expect(snap.data.avatarUrl).toContain("avatars.githubusercontent.com");
     expect(snap.version).toBeTypeOf("string");
 
-    const snap2 = await provider.getRepo("moemu", "Muika-After-Story"); // case-insensitive key
-    expect(snap2.data.name).toBe("Muika-After-Story");
+    const snap2 = await provider.getRepo("moemu", "Erika"); // case-insensitive key
+    expect(snap2.data.name).toBe("Erika");
     expect(calls).toBe(1); // single flight / TTL cache
   });
 
@@ -124,12 +124,12 @@ describe("createGitHubProvider", () => {
         return ghResponse(repoBody(), { etag: '"abc"' });
       },
     });
-    await provider.getRepo("Moemu", "Muika-After-Story");
+    await provider.getRepo("Moemu", "Erika");
     await sleep(60); // expire fresh TTL -> SWR: stale served, background revalidation
-    const stale = await provider.getRepo("Moemu", "Muika-After-Story");
+    const stale = await provider.getRepo("Moemu", "Erika");
     expect(stale.freshness).toBe("stale");
     await sleep(10); // let the background revalidation (304) land
-    const fresh = await provider.getRepo("Moemu", "Muika-After-Story");
+    const fresh = await provider.getRepo("Moemu", "Erika");
     expect(calls[1]?.headers).toHaveProperty("If-None-Match", '"abc"');
     expect(fresh.data.stargazersCount).toBe(9);
     expect(fresh.freshness).toBe("fresh");
@@ -142,17 +142,17 @@ describe("createGitHubProvider", () => {
       freshTtlMs: 10,
       fetchImpl: async () => ghResponse(current, { etag: '"v2"' }),
     });
-    await provider.getRepo("Moemu", "Muika-After-Story");
+    await provider.getRepo("Moemu", "Erika");
     await sleep(15);
-    const staleSnap = await provider.getRepo("Moemu", "Muika-After-Story");
+    const staleSnap = await provider.getRepo("Moemu", "Erika");
     expect(staleSnap.freshness).toBe("stale");
     expect(staleSnap.data.stargazersCount).toBe(9);
 
     current = repoBody({ stargazers_count: 42 });
     await sleep(10); // background revalidation from the stale serve lands (still 9)
-    await provider.getRepo("Moemu", "Muika-After-Story"); // serves 9 stale again + refreshes -> 42
+    await provider.getRepo("Moemu", "Erika"); // serves 9 stale again + refreshes -> 42
     await sleep(15);
-    const fresh = await provider.getRepo("Moemu", "Muika-After-Story");
+    const fresh = await provider.getRepo("Moemu", "Erika");
     expect(fresh.data.stargazersCount).toBe(42);
     expect(fresh.version).not.toBe(staleSnap.version);
   });
@@ -186,7 +186,7 @@ describe("createGitHubProvider", () => {
           headers: { "retry-after": "120", "x-ratelimit-remaining": "0" },
         }),
     });
-    const err = await provider.getRepo("Moemu", "Muika-After-Story").catch((e) => e);
+    const err = await provider.getRepo("Moemu", "Erika").catch((e) => e);
     expect(err).toBeInstanceOf(UpstreamError);
     expect((err as UpstreamError).kind).toBe("rate-limited");
     expect((err as UpstreamError).retryAfterSeconds).toBe(120);
@@ -203,13 +203,13 @@ describe("createGitHubProvider", () => {
         return ghResponse(repoBody());
       },
     });
-    await expect(provider.getRepo("Moemu", "Muika-After-Story")).rejects.toBeInstanceOf(UpstreamError);
-    await expect(provider.getRepo("Moemu", "Muika-After-Story")).rejects.toBeInstanceOf(UpstreamError);
+    await expect(provider.getRepo("Moemu", "Erika")).rejects.toBeInstanceOf(UpstreamError);
+    await expect(provider.getRepo("Moemu", "Erika")).rejects.toBeInstanceOf(UpstreamError);
     expect(calls).toBe(1); // short cache absorbed the retry
     await sleep(25);
     healthy = true;
-    const snap = await provider.getRepo("Moemu", "Muika-After-Story");
-    expect(snap.data.name).toBe("Muika-After-Story");
+    const snap = await provider.getRepo("Moemu", "Erika");
+    expect(snap.data.name).toBe("Erika");
   });
 
   it("throws stale-expired when revalidation fails beyond max staleness", async () => {
@@ -223,12 +223,12 @@ describe("createGitHubProvider", () => {
         return ghResponse(repoBody());
       },
     });
-    await provider.getRepo("Moemu", "Muika-After-Story");
+    await provider.getRepo("Moemu", "Erika");
     await sleep(10); // past fresh TTL -> background SWR kicked in while healthy
-    await provider.getRepo("Moemu", "Muika-After-Story");
+    await provider.getRepo("Moemu", "Erika");
     healthy = false;
     await sleep(60); // beyond maxStale with a dead upstream
-    await expect(provider.getRepo("Moemu", "Muika-After-Story")).rejects.toMatchObject({
+    await expect(provider.getRepo("Moemu", "Erika")).rejects.toMatchObject({
       kind: "stale-expired",
     });
   });
@@ -243,8 +243,8 @@ describe("createGitHubProvider", () => {
       },
     });
     const [a, b] = await Promise.all([
-      provider.getRepo("Moemu", "Muika-After-Story"),
-      provider.getRepo("Moemu", "Muika-After-Story"),
+      provider.getRepo("Moemu", "Erika"),
+      provider.getRepo("Moemu", "Erika"),
     ]);
     expect(calls).toBe(1);
     expect(a.version).toBe(b.version);
@@ -266,15 +266,15 @@ describe("rate-limit handling regressions", () => {
       },
     });
     // first failure (blocking) -> backoffUntil = +500ms
-    await expect(provider.getRepo("Moemu", "Muika-After-Story")).rejects.toBeInstanceOf(UpstreamError);
+    await expect(provider.getRepo("Moemu", "Erika")).rejects.toBeInstanceOf(UpstreamError);
     expect(calls).toBe(1);
     // request during backoff: no network, error, AND no inflight poisoning
-    await expect(provider.getRepo("Moemu", "Muika-After-Story")).rejects.toBeInstanceOf(UpstreamError);
+    await expect(provider.getRepo("Moemu", "Erika")).rejects.toBeInstanceOf(UpstreamError);
     expect(calls).toBe(1);
     // backoff over, upstream recovered -> must hit the network again
     healthy = true;
     clock += 600;
-    const snap = await provider.getRepo("Moemu", "Muika-After-Story");
+    const snap = await provider.getRepo("Moemu", "Erika");
     expect(calls).toBe(2);
     expect(snap.data.stargazersCount).toBe(42);
     expect(snap.freshness).toBe("fresh");
@@ -293,13 +293,13 @@ describe("rate-limit handling regressions", () => {
         return ghResponse(repoBody());
       },
     });
-    await expect(provider.getRepo("Moemu", "Muika-After-Story")).rejects.toMatchObject({ kind: "rate-limited" });
+    await expect(provider.getRepo("Moemu", "Erika")).rejects.toMatchObject({ kind: "rate-limited" });
     clock += 16 * 60_000; // 16 minutes: still inside the 60 min upstream wait
-    const still = await provider.getRepo("Moemu", "Muika-After-Story").catch((e) => e);
+    const still = await provider.getRepo("Moemu", "Erika").catch((e) => e);
     expect(still).toMatchObject({ kind: "rate-limited", retryAfterSeconds: 3600 });
     expect(calls).toBe(1);
     clock += 50 * 60_000; // 66 minutes total: past the upstream wait
-    const snap = await provider.getRepo("Moemu", "Muika-After-Story");
+    const snap = await provider.getRepo("Moemu", "Erika");
     expect(calls).toBe(2);
     expect(snap.freshness).toBe("fresh");
   });

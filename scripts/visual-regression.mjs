@@ -11,25 +11,40 @@ const baselines = join(root, "tests/visual/baselines");
 const output = join(root, "out/visual");
 const update = process.argv.includes("--update");
 const registry = loadPresetRegistry(DEFAULT_PRESETS_PATH);
-const fixture = (name) => JSON.parse(readFileSync(join(DEFAULT_TEMPLATES_DIR, "extracted", name, "data.json"), "utf8"));
 const avatar = createCanvas(240, 320);
 const ctx = avatar.getContext("2d");
 ctx.fillStyle = "#698DB5";
 ctx.fillRect(0, 0, 240, 320);
 ctx.fillStyle = "#F1B998";
 ctx.fillRect(45, 60, 150, 180);
+/** Erika itself is the default subject; the stranger case proves the reuse
+ * path with no preset and no hand-tuned copy. */
+const erika = {
+  fullName: "Moemu/Erika",
+  name: "Erika",
+  description: "A URL-driven banner service: point an image at a repository and get a portrait banner back.",
+  defaultBranch: "main",
+  private: false,
+};
+const stranger = {
+  fullName: "Some/Random-Repository",
+  name: "Random-Repository",
+  description: "A repository this service has never seen before.",
+  defaultBranch: "main",
+  private: false,
+};
 const cases = [
-  { id: "mas-auto", template: "grokbot", repo: "Moemu/Muika-After-Story", data: fixture("mas"), asset: "muika-icon.webp", kind: "repo", params: {} },
+  { id: "erika-repo", template: "grokbot", repo: "Moemu/Erika", data: erika, asset: "erika.webp", kind: "repo", params: {} },
   {
-    id: "accent-mas",
+    id: "erika-accent",
     template: "grokbot",
-    repo: "Moemu/Muika-After-Story",
-    data: { ...fixture("mas"), description: "An **event-loop** Chatbot framework based on an emotional state machine." },
-    asset: "muika-icon.webp",
+    repo: "Moemu/Erika",
+    data: { ...erika, description: "A **URL-driven** banner service for GitHub repositories." },
+    asset: "erika.webp",
     kind: "repo",
     params: {},
   },
-  { id: "rikka-auto", template: "grokbot", repo: "Moemu/Nonebot-Plugin-Rikka", data: fixture("rikka"), asset: "rikka-icon.webp", kind: "repo", params: {} },
+  { id: "stranger-repo", template: "grokbot", repo: "Some/Random-Repository", data: stranger, asset: "erika.webp", kind: "repo", params: {} },
   { id: "avatar-zh-light", template: "avatar", data: { fullName: "Example/Project", name: "中文项目与长标题排版", description: "这是固定的中文描述，用来检查字体回退、换行和图文间距。\nA fixed bilingual description for visual regression." }, kind: "avatar", params: { theme: "light" } },
 ];
 mkdirSync(update ? baselines : output, { recursive: true });

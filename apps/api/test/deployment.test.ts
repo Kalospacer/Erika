@@ -25,34 +25,38 @@ function app(imageFetcher?: (url: string) => Promise<Buffer>) {
 }
 
 describe("deployed assets and documented API", () => {
-  it.each(["Muika-After-Story", "Nonebot-Plugin-Rikka"])("fetches %s's preset from its public repo path", async (repo) => {
+  it("fetches Erika's preset from its public repo path", async () => {
     // the preset's declared path is the contract; expect exactly that URL
-    const declared = loadPresetRegistry(DEFAULT_PRESETS_PATH).get(`Moemu/${repo}`)?.icon?.path;
-    expect(declared, `Moemu/${repo} declares an icon path`).toBeTruthy();
+    const declared = loadPresetRegistry(DEFAULT_PRESETS_PATH).get("Moemu/Erika")?.icon?.path;
+    expect(declared, "Moemu/Erika declares an icon path").toBeTruthy();
     const urls: string[] = [];
     const server = app(async (url) => {
       urls.push(url);
-      expect(url).toBe(`https://raw.githubusercontent.com/Moemu/${repo}/main/${declared}`);
-      return readFileSync(join(DEFAULT_TEMPLATES_DIR, "assets/muika-icon.webp"));
+      expect(url).toBe(`https://raw.githubusercontent.com/Moemu/Erika/main/${declared}`);
+      return readFileSync(join(DEFAULT_TEMPLATES_DIR, "assets", "erika.webp"));
     });
-    const response = await server.request(`/v1/banner/Moemu/${repo}.webp?meta=`);
+    const response = await server.request("/v1/banner/Moemu/Erika.webp?meta=");
     expect(response.status).toBe(200);
     expect(response.headers.get("x-banner-icon")).toBe("repo");
     expect(urls).toHaveLength(1);
   });
 
-  it("loads the built script and stylesheet from a nested SPA URL", async () => {
+  it("loads the built script, stylesheet and app icons from a nested SPA URL", async () => {
     const server = app();
     const url = "https://example.test/some/nested/page";
     const response = await server.request(url);
     expect(response.status).toBe(200);
     const html = await response.text();
-    const assets = [...html.matchAll(/(?:src|href)="([^"]+\.(?:js|css|svg))"/g)];
-    expect(assets.length).toBeGreaterThanOrEqual(3);
-    for (const [, path] of assets) {
+    const assets = [...html.matchAll(/(?:src|href)="([^"]+\.(?:js|css|png|ico|webmanifest))"/g)].map((m) => m[1]);
+    expect(assets.some((p) => p.endsWith(".js"))).toBe(true);
+    expect(assets.some((p) => p.endsWith(".css"))).toBe(true);
+    // the app icon set ships with the SPA (favicon / touch icon / manifest)
+    expect(assets.some((p) => p.endsWith(".ico"))).toBe(true);
+    expect(assets.some((p) => p.endsWith("apple-touch-icon.png"))).toBe(true);
+    for (const path of assets) {
       const asset = await server.request(new URL(path, url).href);
       expect(asset.status, path).toBe(200);
-      expect(asset.headers.get("content-type")).not.toContain("text/html");
+      expect(asset.headers.get("content-type"), path).not.toContain("text/html");
     }
   });
 

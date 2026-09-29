@@ -41,7 +41,7 @@ try {
   }
   const metadata = await (await fetch(`${origin}/v1/meta`)).json();
   assert(metadata.templates.some((t) => t.id === "grokbot"));
-  const url = `${origin}/v1/banner/Moemu/Muika-After-Story.webp`;
+  const url = `${origin}/v1/banner/Moemu/Erika.webp`;
   const banner = await fetch(url);
   assert.equal(banner.status, 200);
   assert.equal(banner.headers.get("content-type"), "image/webp");

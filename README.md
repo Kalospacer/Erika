@@ -229,11 +229,10 @@ Playground 地址为 `http://localhost:5173`，API 地址为 `http://localhost:8
 node packages/cli/dist/cli.js render-live --owner Moemu --repo Erika --out out/banner.webp
 ```
 
-也可以渲染内置样例，输出位于 `out/`：
+也可以直接渲染 Erika 自己的 Banner，输出位于 `out/`：
 
 ```bash
-pnpm render:mas
-pnpm render:rikka
+pnpm render:erika
 ```
 
 ### 修改与验证
@@ -250,7 +249,7 @@ pnpm typecheck:vercel
 
 ## 关于🎗️
 
-Erika（絵里香）是一位为仓库绘制肖像的画师少女。项目从 Muika-After-Story 和 Nonebot-Plugin-Rikka 的 Banner 排版出发，将手工制作的介绍图变成可通过 URL 配置的服务。
+Erika（絵里香）是一位为仓库绘制肖像的画师少女。项目从手工排版的 PSD 封面图出发，把一张张手工做的介绍图变成可通过 URL 配置、随仓库数据变化的服务。
 
 感谢以下项目与资源：
 

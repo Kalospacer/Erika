@@ -2,7 +2,7 @@
   "name": "erika",
   "license": "MIT",
   "private": true,
-  "description": "Erika\uff08\u7d75\u91cc\u9999\uff09\u2014\u2014\u4e3a\u4f60\u7684\u4ed3\u5e93\u7ed8\u5236\u8096\u50cf\u7684\u753b\u5e08\u5c11\u5973 / A banner girl who paints portraits for your repos",
+  "description": "Erika（絵里香）——为你的仓库绘制肖像的画师少女 / A banner girl who paints portraits for your repos",
   "packageManager": "pnpm@12.3.4",
   "engines": {
     "node": ">=22"
@@ -12,10 +12,9 @@
     "test": "pnpm -r test && pnpm test:visual",
     "test:visual": "node scripts/visual-regression.mjs",
     "visual:update": "node scripts/visual-regression.mjs --update",
-    "render:mas": "node packages/cli/dist/cli.js render --template grokbot --data packages/templates/extracted/mas/data.json --preset Moemu/Muika-After-Story --icon packages/templates/assets/muika-icon.webp --out out/mas.webp",
-    "render:rikka": "node packages/cli/dist/cli.js render --template grokbot --data packages/templates/extracted/rikka/data.json --preset Moemu/Nonebot-Plugin-Rikka --icon packages/templates/assets/rikka-icon.webp --out out/rikka.webp",
     "dev:api": "pnpm --filter @erika/api dev",
-    "typecheck:vercel": "tsc -p tsconfig.vercel.json"
+    "typecheck:vercel": "tsc -p tsconfig.vercel.json",
+    "render:erika": "node packages/cli/dist/cli.js render-live --owner Moemu --repo Erika --out out/erika.webp"
   },
   "devDependencies": {
     "typescript": "^5.6.0",

@@ -8,13 +8,11 @@
 
 | 文件 | 用途或来源 |
 | --- | --- |
-| `packages/templates/assets/grokbot-default.webp` | Erika 默认插画 |
-| `packages/templates/assets/muika-icon.webp` | Muika-After-Story 参考插画 |
-| `packages/templates/assets/rikka-icon.webp` | Nonebot-Plugin-Rikka 参考插画 |
-| `packages/templates/extracted/mas/assets/icon.png` | MAS PSD 中提取的插画副本 |
-| `packages/templates/extracted/rikka/assets/icon.png` | Rikka PSD 中提取的插画副本 |
+| `packages/templates/assets/erika.webp` | Erika 默认插画（模板内置图标） |
+| `assets/erika-icon.webp` | Erika 仓库自身图标（Banner 左侧插画） |
+| `apps/playground/public/icon-192.png`、`icon-512.png`、`favicon.ico`、`favicon-32.png`、`apple-touch-icon.png` | 应用图标，由同一张透明底原图导出 |
 
-`tests/visual/baselines/mas-auto.png` 和 `tests/visual/baselines/rikka-auto.png` 是相应插画的排版衍生图，沿用原素材的权利范围。
+`tests/visual/baselines/erika-repo.png`、`erika-accent.png`、`stranger-repo.png` 是上述插画的排版衍生图，沿用原素材的权利范围。
 `tests/visual/baselines/avatar-zh-light.png` 使用测试脚本绘制的头像图形，按项目 MIT 许可证提供。
 
 对于上述素材中 Moemu 实际持有且有权授权的权利，Moemu 按 [MIT](LICENSE) 授权。
@@ -36,7 +34,7 @@ AI 生成不意味着图片必然享有著作权、具有独占性，或已取�
 
 这些条款说明 OpenAI 与生成用户之间的权利安排，不构成第三方权利清理证明。
 本项目记录生成来源，但不据此声称每张图片均具有完整、排他的著作权。
-MAS 样例描述提到其角色设计受《Doki Doki Literature Club!》中的 Monika 启发；本声明不授予该角色或作品的权利。
+样例文案或图标如提及第三方作品、角色或商标，本声明不授予该作品、角色或商标的权利。
 各插画的完整参考素材及其授权尚未逐项核验，不能把本文件当作已完成该核验的证明。
 
 ### 提示词来源

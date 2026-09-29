@@ -31,9 +31,9 @@ function snapshot(stars: number, versionSuffix = ""): RepoSnapshot {
     freshness: "fresh",
     version: `v${stars}${versionSuffix}`,
     data: {
-      fullName: "Moemu/Muika-After-Story",
-      name: "Muika-After-Story",
-      description: "An event-loop Chatbot framework\nbased on an emotional state machine,\nwith its character design inspired\nby Monika from Doki Doki Literature Club.",
+      fullName: "Moemu/Erika",
+      name: "Erika",
+      description: "A URL-driven banner service\nfor GitHub repositories,\nrendering portrait banners.",
       stargazersCount: stars,
       forksCount: 1,
       avatarUrl: "https://avatars.githubusercontent.com/u/1?v=4",
@@ -57,7 +57,7 @@ function buildApp(queue: Array<RepoSnapshot | Error>) {
     // fixture instead, so the repo-icon path is exercised without network
     imageFetcher: async (url: string) => {
       if (url.includes("avatars.githubusercontent.com")) throw new Error("no avatars in these tests");
-      return readFileSync(join(DEFAULT_TEMPLATES_DIR, "assets", "muika-icon.webp"));
+      return readFileSync(join(DEFAULT_TEMPLATES_DIR, "assets", "erika.webp"));
     },
     cacheMaxBytes: 64 * 1024 * 1024,
   });
@@ -74,7 +74,7 @@ describe("GET /v1/banner", () => {
 
   it("renders a webp with ETag + cache headers", async () => {
     queue.push(snapshot(9));
-    const res = await app.request("/v1/banner/Moemu/Muika-After-Story.webp");
+    const res = await app.request("/v1/banner/Moemu/Erika.webp");
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toBe("image/webp");
     expect(res.headers.get("etag")).toMatch(/^"[0-9a-f]{32}"$/);
@@ -88,9 +88,9 @@ describe("GET /v1/banner", () => {
   it("revalidates with ETag: identical payload -> 304", async () => {
     const snap = snapshot(9);
     queue.push(snap, snap);
-    const res1 = await app.request("/v1/banner/Moemu/Muika-After-Story.webp");
+    const res1 = await app.request("/v1/banner/Moemu/Erika.webp");
     const etag = res1.headers.get("etag")!;
-    const res2 = await app.request("/v1/banner/Moemu/Muika-After-Story.webp", {
+    const res2 = await app.request("/v1/banner/Moemu/Erika.webp", {
       headers: { "If-None-Match": etag },
     });
     expect(res2.status).toBe(304);
@@ -99,7 +99,7 @@ describe("GET /v1/banner", () => {
   it("KEY ACCEPTANCE: same URL updates after data change (new ETag, new bytes)", async () => {
     // stars are VISIBLE by default (the template declares the footer row)
     queue.push(snapshot(9), snapshot(42, "-b"), snapshot(42, "-b"));
-    const url = "/v1/banner/Moemu/Muika-After-Story.webp";
+    const url = "/v1/banner/Moemu/Erika.webp";
     const res1 = await app.request(url);
     const etag1 = res1.headers.get("etag")!;
     const bytes1 = await res1.arrayBuffer();
@@ -118,7 +118,7 @@ describe("GET /v1/banner", () => {
 
   it("invariant: with metadata off (?meta=) a stars-only change keeps the bytes", async () => {
     queue.push(snapshot(9), snapshot(42, "-b"));
-    const url = "/v1/banner/Moemu/Muika-After-Story.webp?meta=";
+    const url = "/v1/banner/Moemu/Erika.webp?meta=";
     const res1 = await app.request(url);
     const res2 = await app.request(url);
     // ETag is the image-bytes hash: with no metadata row the render is identical
@@ -129,8 +129,8 @@ describe("GET /v1/banner", () => {
 
   it("metadata rows are opt-out: ?meta= renders a different image", async () => {
     queue.push(snapshot(9), snapshot(9));
-    const withRows = await app.request("/v1/banner/Moemu/Muika-After-Story.webp");
-    const without = await app.request("/v1/banner/Moemu/Muika-After-Story.webp?meta=");
+    const withRows = await app.request("/v1/banner/Moemu/Erika.webp");
+    const without = await app.request("/v1/banner/Moemu/Erika.webp?meta=");
     expect(without.status).toBe(200);
     expect(without.headers.get("etag")).not.toBe(withRows.headers.get("etag"));
   });
@@ -138,10 +138,10 @@ describe("GET /v1/banner", () => {
   it("description accent markers survive the query path and change the bytes only by colour", async () => {
     queue.push(snapshot(9), snapshot(9));
     const plain = await app.request(
-      "/v1/banner/Moemu/Muika-After-Story.webp?description=A%20Nonebot%202%20plugin",
+      "/v1/banner/Moemu/Erika.webp?description=A%20Nonebot%202%20plugin",
     );
     const marked = await app.request(
-      "/v1/banner/Moemu/Muika-After-Story.webp?description=A%20**Nonebot%202**%20plugin",
+      "/v1/banner/Moemu/Erika.webp?description=A%20**Nonebot%202**%20plugin",
     );
     expect(marked.status).toBe(200);
     expect(marked.headers.get("etag")).not.toBe(plain.headers.get("etag"));
@@ -160,7 +160,7 @@ describe("GET /v1/banner", () => {
 
   it("rate limited without stale -> transient placeholder with short cache", async () => {
     queue.push(new UpstreamError("rate-limited", "limited", 120));
-    const res = await app.request("/v1/banner/Moemu/Muika-After-Story.webp");
+    const res = await app.request("/v1/banner/Moemu/Erika.webp");
     expect(res.status).toBe(200);
     expect(res.headers.get("x-banner-error")).toBe("upstream-rate-limited");
     expect(res.headers.get("cache-control")).toBe("public, max-age=60, s-maxage=60");
@@ -169,7 +169,7 @@ describe("GET /v1/banner", () => {
   it("serves stale data when the provider says so (degradation path)", async () => {
     const stale = { ...snapshot(9), freshness: "stale" as const };
     queue.push(stale);
-    const res = await app.request("/v1/banner/Moemu/Muika-After-Story.webp");
+    const res = await app.request("/v1/banner/Moemu/Erika.webp");
     expect(res.status).toBe(200);
     expect(res.headers.get("x-banner-error")).toBeNull();
     expect(res.headers.get("cache-control")).toContain("s-maxage=3600");
@@ -177,28 +177,28 @@ describe("GET /v1/banner", () => {
 
   it("fresh=1 switches the response to revalidate-always", async () => {
     queue.push(snapshot(9));
-    const res = await app.request("/v1/banner/Moemu/Muika-After-Story.webp?fresh=1");
+    const res = await app.request("/v1/banner/Moemu/Erika.webp?fresh=1");
     expect(res.status).toBe(200);
     expect(res.headers.get("cache-control")).toBe("no-cache");
   });
 
   it("validates params: bad scale / long title / unknown template / unknown theme", async () => {
     queue.push(snapshot(9));
-    const badScale = await app.request("/v1/banner/Moemu/Muika-After-Story.webp?scale=2");
+    const badScale = await app.request("/v1/banner/Moemu/Erika.webp?scale=2");
     expect(badScale.status).toBe(400);
     const longTitle = await app.request(
-      `/v1/banner/Moemu/Muika-After-Story.webp?title=${"x".repeat(LIMITS.titleChars + 1)}`,
+      `/v1/banner/Moemu/Erika.webp?title=${"x".repeat(LIMITS.titleChars + 1)}`,
     );
     expect(longTitle.status).toBe(400);
     const longDesc = await app.request(
-      `/v1/banner/Moemu/Muika-After-Story.webp?description=${"x".repeat(LIMITS.descriptionChars + 1)}`,
+      `/v1/banner/Moemu/Erika.webp?description=${"x".repeat(LIMITS.descriptionChars + 1)}`,
     );
     expect(longDesc.status).toBe(400);
-    const badTemplate = await app.request("/v1/banner/Moemu/Muika-After-Story/nope.webp");
+    const badTemplate = await app.request("/v1/banner/Moemu/Erika/nope.webp");
     expect(badTemplate.status).toBe(400);
-    const badTheme = await app.request("/v1/banner/Moemu/Muika-After-Story.webp?theme=sepia");
+    const badTheme = await app.request("/v1/banner/Moemu/Erika.webp?theme=sepia");
     expect(badTheme.status).toBe(400);
-    const badExt = await app.request("/v1/banner/Moemu/Muika-After-Story.gif");
+    const badExt = await app.request("/v1/banner/Moemu/Erika.gif");
     expect(badExt.status).toBe(400);
   });
 
@@ -257,23 +257,23 @@ describe("review regressions", () => {
 
   it("unknown meta field -> 400 (service and template agree on the field set)", async () => {
     queue.push(snapshot(9));
-    const res = await app.request("/v1/banner/Moemu/Muika-After-Story.webp?meta=bogus");
+    const res = await app.request("/v1/banner/Moemu/Erika.webp?meta=bogus");
     expect(res.status).toBe(400);
   });
 
   it("a meta subset renders a different image than the declared default", async () => {
     queue.push(snapshot(9), snapshot(9));
-    const subset = await app.request("/v1/banner/Moemu/Muika-After-Story.webp?meta=stars");
-    const all = await app.request("/v1/banner/Moemu/Muika-After-Story.webp");
+    const subset = await app.request("/v1/banner/Moemu/Erika.webp?meta=stars");
+    const all = await app.request("/v1/banner/Moemu/Erika.webp");
     expect(subset.status).toBe(200);
     expect(subset.headers.get("etag")).not.toBe(all.headers.get("etag"));
   });
 
-  it("explicit light theme survives preset theme overrides (Rikka dark != light)", async () => {
-    // rikka preset overrides dark colors; light must NOT inherit them
+  it("explicit light theme survives preset theme overrides (Erika dark != light)", async () => {
+    // the Erika preset overrides the accent; a light request must not inherit the dark palette
     queue.push(snapshot(9), snapshot(9));
-    const dark = await app.request("/v1/banner/Moemu/Nonebot-Plugin-Rikka.webp?theme=dark");
-    const light = await app.request("/v1/banner/Moemu/Nonebot-Plugin-Rikka.webp?theme=light");
+    const dark = await app.request("/v1/banner/Moemu/Erika.webp?theme=dark");
+    const light = await app.request("/v1/banner/Moemu/Erika.webp?theme=light");
     expect(dark.status).toBe(200);
     expect(light.status).toBe(200);
     const dk = Buffer.from(await dark.arrayBuffer());

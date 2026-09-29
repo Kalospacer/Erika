@@ -15,15 +15,15 @@ const fakeMeasure: MeasureFn = (text, size, tracking) =>
   [...text].length * (0.6 + tracking) * size;
 
 describe("buildTitleRuns", () => {
-  it("splits Muika-After-Story like the PSD style runs (1,5,1,5,1,5)", () => {
-    const runs = buildTitleRuns("Muika-After-Story");
+  it("splits hyphenated names into word-initial accent runs", () => {
+    const runs = buildTitleRuns("Erika-Banner-Service");
     expect(runs.map((r) => [r.color, r.text])).toEqual([
-      ["accent", "M"],
-      ["base", "uika-"],
-      ["accent", "A"],
-      ["base", "fter-"],
+      ["accent", "E"],
+      ["base", "rika-"],
+      ["accent", "B"],
+      ["base", "anner-"],
       ["accent", "S"],
-      ["base", "tory"],
+      ["base", "ervice"],
     ]);
   });
 

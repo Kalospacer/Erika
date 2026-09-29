@@ -172,10 +172,10 @@ describe("icon display acceptance matrix", () => {
     expect(captureBackgroundColor(await loadImage(await c.encode("png"))).color).toBeNull();
   });
 
-  it("background capture: the shipped Grokbot sources sample cleanly (regression)", async () => {
+  it("background capture: the shipped icon source samples cleanly (regression)", async () => {
     // their left edge carries the artwork, so the old border-wide sampler always
     // failed on these exact files; the top-right region is blank by design
-    for (const name of ["muika-icon.webp", "rikka-icon.webp", "grokbot-default.webp"]) {
+    for (const name of ["erika.webp"]) {
       const cap = captureBackgroundColor(await loadImage(join(DEFAULT_TEMPLATES_DIR, "assets", name)));
       expect(cap.transparent).toBe(false);
       expect(cap.color).toMatch(/^#[0-9a-f]{6}$/);

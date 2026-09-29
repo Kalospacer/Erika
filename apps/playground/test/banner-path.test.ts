@@ -3,7 +3,7 @@ import { bannerPath, type ParamState } from "../src/lib/api.js";
 
 const base: ParamState = {
   owner: "Moemu",
-  repo: "Muika-After-Story",
+  repo: "Erika",
   template: null,
   theme: null,
   title: "",
@@ -21,12 +21,12 @@ const base: ParamState = {
 
 describe("bannerPath", () => {
   it("puts the extension at the end of the default-template path", () => {
-    expect(bannerPath(base)).toBe("/v1/banner/Moemu/Muika-After-Story.webp");
+    expect(bannerPath(base)).toBe("/v1/banner/Moemu/Erika.webp");
   });
 
   it("P1 regression: explicit template moves the extension to the whole path", () => {
     const p = bannerPath({ ...base, template: "avatar", theme: "dark" });
-    expect(p).toBe("/v1/banner/Moemu/Muika-After-Story/avatar.webp?theme=dark");
+    expect(p).toBe("/v1/banner/Moemu/Erika/avatar.webp?theme=dark");
   });
 
   it("encodes owner/repo but keeps dotted repo names intact", () => {
@@ -38,7 +38,7 @@ describe("bannerPath", () => {
   it("carries meta explicit-off, icon overrides and scale", () => {
     const p = bannerPath({ ...base, template: "grokbot", meta: "", scale: 0.75, icon: "avatar", iconPath: "assets/mine.webp" });
     expect(p).toBe(
-      "/v1/banner/Moemu/Muika-After-Story/grokbot.webp?scale=0.75&icon=avatar&iconPath=assets%2Fmine.webp&meta=",
+      "/v1/banner/Moemu/Erika/grokbot.webp?scale=0.75&icon=avatar&iconPath=assets%2Fmine.webp&meta=",
     );
   });
 

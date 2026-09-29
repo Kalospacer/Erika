@@ -9,10 +9,10 @@
 name: Refresh banner
 
 env:
-  ERIKA_REPO: Moemu/erika   # Erika 工具仓库（建议固定到 release tag）
+  ERIKA_REPO: Moemu/Erika   # Erika 工具仓库（建议固定到 release tag）
   ERIKA_REF: main          # 默认跟随 main；正式使用请固定到验证过的提交 SHA 或 release tag
   BANNER_OWNER: Moemu       # ← 改成你的 owner
-  BANNER_REPO: Muika-After-Story   # ← 改成你的 repo
+  BANNER_REPO: Erika   # ← 改成你的 repo
   BANNER_TEMPLATE: grokbot   # grokbot / avatar
   BANNER_OUT: assets/banner.webp   # 输出路径（相对你的仓库根）
 

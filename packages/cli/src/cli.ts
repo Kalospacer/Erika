@@ -24,7 +24,7 @@ import {
   loadTemplate,
 } from "@erika/core";
 import { createGitHubProvider } from "@erika/providers";
-import { createImageFetcher, repoIconUrlsFor, resolveIconChain } from "@erika/core";
+import { createImageFetcher, isRepoRelativePath, repoIconUrlsFor, resolveIconChain } from "@erika/core";
 import type { BannerData, Preset, Template } from "@erika/core";
 
 type Deps = { templatesDir: string; presetsPath: string };
@@ -165,6 +165,9 @@ export async function renderLiveCommand(
   // same public interface as the API: the project icon lives in the subject
   // repo (or --icon pins a local file for offline runs)
   const iconBuffer = values.icon ? readFileSync(resolve(values.icon)) : null;
+  if (preset?.icon?.path && !isRepoRelativePath(preset.icon.path)) {
+    console.error(`[icons] preset icon path "${preset.icon.path}" is not repo-relative; probing the conventional paths instead`);
+  }
   const repoIconUrls = repoIconUrlsFor({
     owner: values.owner,
     repo: values.repo,

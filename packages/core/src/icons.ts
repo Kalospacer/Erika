@@ -87,8 +87,21 @@ export const REPO_ICON_PATHS = [
   "assets/grokbot-icon.jpg",
 ];
 
+/** Repo-relative path guard: a preset may only name a path INSIDE the subject
+ * repo. Absolute filesystem paths (POSIX `/…`, Windows `C:\…`, UNC `\\…`) and
+ * parent traversal must never reach the raw base -- an absolute path used to be
+ * concatenated and 404'd silently in the container. */
+export function isRepoRelativePath(p: string): boolean {
+  const path = p.trim();
+  if (path === "") return false;
+  if (path.startsWith("/") || path.startsWith("\\")) return false;
+  if (/^[A-Za-z]:/.test(path)) return false;
+  return !path.split(/[\\/]/u).includes("..");
+}
+
 /** Candidate raw URLs for the subject repo's icon: an explicit path wins,
- * otherwise the conventional locations are probed in order. */
+ * otherwise the conventional locations are probed in order. An explicit path
+ * that is not repo-relative is ignored (see isRepoRelativePath). */
 export function repoIconUrlsFor(s: {
   owner: string;
   repo: string;
@@ -96,7 +109,7 @@ export function repoIconUrlsFor(s: {
   explicit?: string;
 }): string[] {
   const base = `https://raw.githubusercontent.com/${s.owner}/${s.repo}/${s.branch ?? "HEAD"}`;
-  if (s.explicit) return [`${base}/${s.explicit.replace(/^\/+/, "")}`];
+  if (s.explicit && isRepoRelativePath(s.explicit)) return [`${base}/${s.explicit.trim()}`];
   return REPO_ICON_PATHS.map((p) => `${base}/${p}`);
 }
 

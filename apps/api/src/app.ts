@@ -32,6 +32,7 @@ import { RenderCache, RenderQueue, QueueOverflowError, SingleFlight, etagOf, sha
 import {
   createImageFetcher,
   declaredMetaFields,
+  isRepoRelativePath,
   repoIconUrlsFor,
   resolveIconChain,
   type ImageFetcher,
@@ -282,6 +283,9 @@ export function createApp(deps: ApiDeps) {
     // conventional path in that repo, overridable) then the default Grokbot icon
     const repoIconPath =
       preset?.icon?.pathLight && q.theme === "light" ? preset.icon.pathLight : preset?.icon?.path;
+    if (repoIconPath && !isRepoRelativePath(repoIconPath)) {
+      log(`preset icon path "${repoIconPath}" is not repo-relative; probing the conventional paths instead`);
+    }
     const repoIconUrls = repoIconUrlsFor({
       owner,
       repo,

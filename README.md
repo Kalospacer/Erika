@@ -51,11 +51,14 @@ Erika 是一个为 GitHub 仓库生成 Banner 的服务。她把项目插画、�
 
 ```html
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://erika-alpha.vercel.app/v1/banner/Moemu/Erika.webp?theme=dark" />
-  <source media="(prefers-color-scheme: light)" srcset="https://erika-alpha.vercel.app/v1/banner/Moemu/Erika.webp?theme=light" />
-  <img alt="项目 Banner" src="https://erika-alpha.vercel.app/v1/banner/Moemu/Erika.webp" />
+  <source media="(prefers-color-scheme: dark)" srcset="https://erika.snowy.moe/v1/banner/Moemu/Erika.webp?theme=dark" />
+  <source media="(prefers-color-scheme: light)" srcset="https://erika.snowy.moe/v1/banner/Moemu/Erika.webp?theme=light" />
+  <img alt="项目 Banner" src="https://erika.snowy.moe/v1/banner/Moemu/Erika.webp" />
 </picture>
 ```
+
+> **注意**：显式指定 `theme` 会关闭插画的背景融合，图标自带的底色会直接显示，与主题底色可能冲突、观感突兀。
+> 需要融合效果时请省略 `theme`（单 URL）。主题化与插画背景的兼容仍在计划中。
 
 </details>
 
@@ -172,7 +175,7 @@ docker run -d --name erika -p 8787:8787 --env-file .env erika:local
 
 | 参数 | 说明 |
 | --- | --- |
-| `theme` | `light` / `dark`；省略时尝试根据插画背景自动配色 |
+| `theme` | `light` / `dark`；省略时根据插画背景自动配色（推荐）；显式指定会关闭背景融合，图标自带底色直接显示 |
 | `icon` | `auto` / `avatar` / `builtin`，默认 `auto` |
 | `iconPath` | 仓库内的图片相对路径，最长 128 个字符 |
 | `iconFit` | `contain` 保留完整图片，`cover` 填满区域并裁切 |

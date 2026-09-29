@@ -3,13 +3,20 @@
 import { z } from "zod";
 
 export const LIMITS = {
-  titleChars: 80,
-  descriptionChars: 200,
-  /** absolute request URL cap. The legal worst case is a 300-character CJK
-   * description (~2.7 KB once percent-encoded) plus path and host, so 2 KB
-   * rejected requests the schema accepted. Measured: GitHub's camo chain
-   * rewrites image URLs by hex-encoding them (~2x + ~100 chars) and accepted a
-   * 4 KB source URL / 8.2 KB camo URL without complaint. */
+  /** Measured title capacity at the title autoFit floor (minScale 0.7, grokbot
+   * text column): ~25 chars of hyphenated Latin, ~14 CJK -- the advertised cap
+   * is the Latin side, CJK titles that long degrade to an ellipsis. */
+  titleChars: 25,
+  /** Measured description capacity at the description autoFit floor (minScale
+   * 0.75) with the stats row reserved, grokbot blend layout: 192 chars of prose
+   * / 182 of long-word text. Pure CJK is heavier (~112). */
+  descriptionChars: 180,
+  /** absolute request URL cap. The legal worst case is a 180-character CJK
+   * description (~1.6 KB once percent-encoded) plus a CJK title, path and host
+   * (~2 KB total), so a 2 KB cap rejected requests the schema accepted.
+   * Measured: GitHub's camo chain rewrites image URLs by hex-encoding them
+   * (~2x + ~100 chars) and accepted a 4 KB source URL / 8.2 KB camo URL
+   * without complaint. */
   urlLength: 4096,
   scaleMax: 1,
   scaleMin: 0.1,

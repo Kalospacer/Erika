@@ -177,8 +177,8 @@ docker run -d --name erika -p 8787:8787 --env-file .env erika:local
 | `iconPath` | 仓库内的图片相对路径，最长 128 个字符 |
 | `iconFit` | `contain` 保留完整图片，`cover` 填满区域并裁切 |
 | `iconRound` | `1` 启用圆形遮罩，`0` 关闭 |
-| `title` | 覆盖标题，最长 80 个字符 |
-| `description` | 覆盖描述，最长 300 个字符 |
+| `title` | 覆盖标题，最长 25 个字符（版式在该长度下仍完整显示） |
+| `description` | 覆盖描述，最长 180 个字符（超出 0.75 倍下限的排版容量会截断） |
 | `meta` | 逗号分隔的字段：`full_name`、`stars`、`forks`、`issues`、`release`；需由所选模板支持 |
 | `scale` | 缩放比例，范围为 0.1～1；默认 0.5，输出 1500 × 900 图片 |
 | `lang` | 错误占位图语言，`en` / `zh`，默认 `en` |

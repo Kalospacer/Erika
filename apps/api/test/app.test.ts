@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { DEFAULT_TEMPLATES_DIR } from "@erika/core";
+import { LIMITS } from "@erika/shared";
 import { createApp } from "../src/app.js";
 import type { GitHubProvider, RepoSnapshot } from "@erika/providers";
 import { NotFoundError, UpstreamError } from "@erika/providers";
@@ -173,8 +174,14 @@ describe("GET /v1/banner", () => {
     queue.push(snapshot(9));
     const badScale = await app.request("/v1/banner/Moemu/Muika-After-Story.webp?scale=2");
     expect(badScale.status).toBe(400);
-    const longTitle = await app.request(`/v1/banner/Moemu/Muika-After-Story.webp?title=${"x".repeat(81)}`);
+    const longTitle = await app.request(
+      `/v1/banner/Moemu/Muika-After-Story.webp?title=${"x".repeat(LIMITS.titleChars + 1)}`,
+    );
     expect(longTitle.status).toBe(400);
+    const longDesc = await app.request(
+      `/v1/banner/Moemu/Muika-After-Story.webp?description=${"x".repeat(LIMITS.descriptionChars + 1)}`,
+    );
+    expect(longDesc.status).toBe(400);
     const badTemplate = await app.request("/v1/banner/Moemu/Muika-After-Story/nope.webp");
     expect(badTemplate.status).toBe(400);
     const badTheme = await app.request("/v1/banner/Moemu/Muika-After-Story.webp?theme=sepia");

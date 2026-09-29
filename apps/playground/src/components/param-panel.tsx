@@ -110,19 +110,19 @@ export function ParamPanel({
             </Field>
           </div>
 
-          <Field label="标题覆盖" hint={`≤ ${limits?.title ?? 80} 字，留空用仓库名`}>
+          <Field label="标题覆盖" hint={`≤ ${limits?.title ?? 25} 字，留空用仓库名`}>
             <TextInput
               value={state.title}
-              maxLength={limits?.title ?? 80}
+              maxLength={limits?.title ?? 25}
               onChange={(e) => patch({ title: e.target.value })}
               spellCheck={false}
             />
           </Field>
 
-          <Field label="描述覆盖" hint={`≤ ${limits?.description ?? 300} 字，留空用仓库描述`}>
+          <Field label="描述覆盖" hint={`≤ ${limits?.description ?? 180} 字，留空用仓库描述`}>
             <textarea
               value={state.description}
-              maxLength={limits?.description ?? 300}
+              maxLength={limits?.description ?? 180}
               onChange={(e) => patch({ description: e.target.value })}
               rows={3}
               className="w-full resize-y rounded-lg border border-white/10 bg-black/25 px-2.5 py-1.5 text-sm text-ink-100 placeholder:text-ink-600 transition-colors focus:border-brand-500/70 focus:outline-none focus:ring-1 focus:ring-brand-500/40"

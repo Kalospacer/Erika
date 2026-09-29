@@ -11,3 +11,9 @@ __pycache__/
 .env.*.local
 !.env.example
 work/
+
+# Agent 工作文档不进公开仓库（本地保留）
+docs/design.md
+docs/acceptance.md
+docs/examples/mas-readme-banner.md
+packages/core/scripts/render-theme.cjs

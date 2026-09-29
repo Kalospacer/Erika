@@ -20,6 +20,15 @@ ctx.fillStyle = "#F1B998";
 ctx.fillRect(45, 60, 150, 180);
 const cases = [
   { id: "mas-auto", template: "grokbot", repo: "Moemu/Muika-After-Story", data: fixture("mas"), asset: "muika-icon.webp", kind: "repo", params: {} },
+  {
+    id: "accent-mas",
+    template: "grokbot",
+    repo: "Moemu/Muika-After-Story",
+    data: { ...fixture("mas"), description: "An **event-loop** Chatbot framework based on an emotional state machine." },
+    asset: "muika-icon.webp",
+    kind: "repo",
+    params: {},
+  },
   { id: "rikka-auto", template: "grokbot", repo: "Moemu/Nonebot-Plugin-Rikka", data: fixture("rikka"), asset: "rikka-icon.webp", kind: "repo", params: {} },
   { id: "avatar-zh-light", template: "avatar", data: { fullName: "Example/Project", name: "中文项目与长标题排版", description: "这是固定的中文描述，用来检查字体回退、换行和图文间距。\nA fixed bilingual description for visual regression." }, kind: "avatar", params: { theme: "light" } },
 ];

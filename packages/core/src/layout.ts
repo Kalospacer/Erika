@@ -126,6 +126,9 @@ export function fitTitle(
 
 export interface WrapResult {
   lines: string[];
+  /** offset of each line's first character in the wrapped text, so callers can
+   * map character ranges (e.g. accent spans) onto the wrapped lines */
+  lineStarts: number[];
   ellipsized: boolean;
 }
 
@@ -177,22 +180,39 @@ export function wrapDescription(
   measure: MeasureFn,
 ): WrapResult {
   const m = (s: string) => measure(s, slot.size, slot.tracking);
-  const manual = text.split(/\r\n|\r|\n/u).map((l) => l.replace(/\s+$/u, ""));
-  while (manual.length > 0 && manual[manual.length - 1] === "") manual.pop();
+  // split with offsets so each wrapped line keeps the position of its first
+  // character in the input text (accent spans are mapped through this)
+  const segments: Array<{ text: string; start: number }> = [];
+  {
+    const re = /\r\n|\r|\n/gu;
+    let start = 0;
+    let hit: RegExpExecArray | null;
+    while ((hit = re.exec(text)) !== null) {
+      segments.push({ text: text.slice(start, hit.index), start });
+      start = hit.index + hit[0].length;
+    }
+    segments.push({ text: text.slice(start), start });
+  }
+  const manual = segments.map((seg) => ({ start: seg.start, text: seg.text.replace(/\s+$/u, "") }));
+  while (manual.length > 0 && manual[manual.length - 1].text === "") manual.pop();
 
   const lines: string[] = [];
+  const lineStarts: number[] = [];
   let ellipsized = false;
 
-  for (const line of manual) {
+  for (const segment of manual) {
+    const line = segment.text;
     if (lines.length >= slot.maxLines) {
       ellipsized = true;
       break;
     }
     if (line === "" || m(line) <= slot.maxWidth) {
       lines.push(line);
+      lineStarts.push(segment.start);
       continue;
     }
     let rest = line;
+    let cursor = segment.start;
     while (rest.length > 0) {
       if (lines.length >= slot.maxLines) {
         ellipsized = true;
@@ -200,6 +220,7 @@ export function wrapDescription(
       }
       if (m(rest) <= slot.maxWidth) {
         lines.push(rest);
+        lineStarts.push(cursor);
         rest = "";
         break;
       }
@@ -219,7 +240,10 @@ export function wrapDescription(
       const sp = cut.lastIndexOf(" ");
       if (sp > 0 && sp >= fit * 0.5) cut = rest.slice(0, sp);
       lines.push(cut.replace(/\s+$/u, ""));
-      rest = rest.slice(cut.length).replace(/^\s+/u, "");
+      lineStarts.push(cursor);
+      const next = rest.slice(cut.length).replace(/^\s+/u, "");
+      cursor += rest.length - next.length;
+      rest = next;
     }
   }
 
@@ -231,6 +255,68 @@ export function wrapDescription(
     lines[lines.length - 1] = last.replace(/\s+$/u, "") + "\u2026";
   }
 
-  return { lines, ellipsized };
+  return { lines, lineStarts, ellipsized };
+}
+
+export interface AccentSpan {
+  /** inclusive start offset in the parsed (marker-free) text */
+  start: number;
+  /** exclusive end offset */
+  end: number;
+}
+
+export interface ParsedDescription {
+  /** marker-free text: this is what gets measured, wrapped and drawn */
+  text: string;
+  /** accent spans over `text` */
+  spans: AccentSpan[];
+}
+
+/** `**…**` marks an accent span (paired, non-nested). The markers never reach
+ * measurement, so they cost no width; an unpaired `**` stays literal. */
+export function parseAccentMarkers(text: string): ParsedDescription {
+  let out = "";
+  const spans: AccentSpan[] = [];
+  let i = 0;
+  while (i < text.length) {
+    if (text.startsWith("**", i)) {
+      const close = text.indexOf("**", i + 2);
+      if (close > i + 2) {
+        spans.push({ start: out.length, end: out.length + (close - (i + 2)) });
+        out += text.slice(i + 2, close);
+        i = close + 2;
+        continue;
+      }
+    }
+    out += text[i];
+    i += 1;
+  }
+  return { text: out, spans };
+}
+
+/** Split one wrapped line into plain/accent segments (theme accent paints the
+ * accent ones). Both offsets and spans live in the marker-free text. */
+export function accentSegments(
+  line: string,
+  lineStart: number,
+  spans: AccentSpan[],
+): Array<{ text: string; accent: boolean }> {
+  const lineEnd = lineStart + line.length;
+  const hits = spans
+    .filter((s) => s.end > lineStart && s.start < lineEnd)
+    .map((s) => ({
+      start: Math.max(s.start, lineStart) - lineStart,
+      end: Math.min(s.end, lineEnd) - lineStart,
+    }))
+    .sort((a, b) => a.start - b.start);
+  const out: Array<{ text: string; accent: boolean }> = [];
+  let cursor = 0;
+  for (const hit of hits) {
+    if (hit.start > cursor) out.push({ text: line.slice(cursor, hit.start), accent: false });
+    out.push({ text: line.slice(hit.start, hit.end), accent: true });
+    cursor = hit.end;
+  }
+  if (cursor < line.length) out.push({ text: line.slice(cursor), accent: false });
+  return out;
 }
 

@@ -10,13 +10,15 @@ import {
 import { existsSync, readdirSync } from "node:fs";
 import { basename, extname, join } from "node:path";
 import {
+  accentSegments,
   buildTitleRuns,
+  descriptionFitSearch,
   fitTitle,
+  parseAccentMarkers,
   wrapDescription,
   type MeasureFn,
 } from "./layout.js";
 import { captureBackgroundColor } from "./icons.js";
-import { descriptionFitSearch } from "./layout.js";
 import { formatNumber } from "./format.js";
 import type {
   BannerData,
@@ -539,12 +541,15 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
   }
 
   // description
-  const description =
+  const rawDescription =
     params.description !== undefined
       ? params.description
       : preset?.description != null
         ? preset.description
         : (data.description ?? "");
+  // `**…**` marks an accent span; the markers are stripped before measuring and
+  // wrapping, so the span survives re-wrapping without costing any width
+  const { text: description, spans: descriptionSpans } = parseAccentMarkers(rawDescription);
   const metaReserve =
     metaSlot && metaSlot.footer && metaFields.length > 0
       ? metaSlot.footer.gap * canvasH +
@@ -602,17 +607,24 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
     ctx.fillStyle = colors.description;
     const firstBaseline =
       descInkTop + (descSlot.firstBaselineOffset ?? inkAscent(ctx, family, size, "Akd"));
+    const accentColor = colors.accent ?? colors.description;
     wrap.lines.forEach((line, i) => {
-      drawTextRouted(
-        ctx,
-        line,
-        descSlot.x,
-        firstBaseline + i * descSlot.leading * size,
-        size,
-        descSlot.tracking,
-        router,
-        letterSpacingOk,
-      );
+      const baseline = firstBaseline + i * descSlot.leading * size;
+      let x = descSlot.x;
+      for (const segment of accentSegments(line, wrap.lineStarts[i] ?? 0, descriptionSpans)) {
+        if (segment.text === "") continue;
+        ctx.fillStyle = segment.accent ? accentColor : colors.description;
+        x += drawTextRouted(
+          ctx,
+          segment.text,
+          x,
+          baseline,
+          size,
+          descSlot.tracking,
+          router,
+          letterSpacingOk,
+        );
+      }
     });
     descLastBaseline = firstBaseline + (wrap.lines.length - 1) * size * descSlot.leading;
     descLastSize = size;

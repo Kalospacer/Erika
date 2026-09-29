@@ -135,6 +135,18 @@ describe("GET /v1/banner", () => {
     expect(without.headers.get("etag")).not.toBe(withRows.headers.get("etag"));
   });
 
+  it("description accent markers survive the query path and change the bytes only by colour", async () => {
+    queue.push(snapshot(9), snapshot(9));
+    const plain = await app.request(
+      "/v1/banner/Moemu/Muika-After-Story.webp?description=A%20Nonebot%202%20plugin",
+    );
+    const marked = await app.request(
+      "/v1/banner/Moemu/Muika-After-Story.webp?description=A%20**Nonebot%202**%20plugin",
+    );
+    expect(marked.status).toBe(200);
+    expect(marked.headers.get("etag")).not.toBe(plain.headers.get("etag"));
+  });
+
   it("not-found repo -> placeholder image with X-Banner-Error + normal cache", async () => {
     queue.push(new NotFoundError("No/Such"));
     const res = await app.request("/v1/banner/No/Such.webp");

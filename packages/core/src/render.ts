@@ -492,15 +492,33 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
 
   const measure = makeMeasurer(ctx, router);
   const letterSpacingOk = "letterSpacing" in ctx;
+  const metaSlot = template.slots.meta;
+  const metaFields: string[] = params.meta ?? declaredMetaFields(metaSlot);
+  const canvasH = template.canvas.height;
 
-  // title — baseline derived from the inkTop anchor via cap height so font
-  // substitution keeps the cap-top aligned with the design.
+  // ---- 文本列垂直版式（紧凑栈）----
+  // 文字的有效 y 轴带 = 图标上下限 [bandTop, bandBottom]。
+  // 上 25% 基线（bandTop + 25% 带高）是 Repo Name（topline）与 Project Name
+  // （title）的分隔线：
+  // - topline 居中于分隔线之上的 25% 区；
+  // - title 居中于分隔线之下的 25% 区——topline 的存在与否不影响 title 位置；
+  // - Desc 在第四象限：墨顶到 x 轴（中线）的距离 = Project Name 墨顶到
+  //   x 轴距离的一半（此约束持续有效）。
+  // - 带底部预留给 metadata footer（如声明并启用）；未启用时描述动态字号
+  //   调节用满剩余空间。
+  const bandTop = box.y;
+  const bandBottom = box.y + box.size;
+  const bandH = bandBottom - bandTop;
+  const divider = bandTop + bandH * 0.25; // 上 25% 基线：topline / title 分隔
+  const midline = bandTop + bandH / 2; // x 轴：Desc 距离的基准线
+
+  // title — centered in the quarter BELOW the divider, so the topline's
+  // presence never shifts it; baseline via ink ascent for font substitution.
   const titleText = params.title ?? preset?.title ?? data.name;
   const fit = fitTitle(titleText, titleSlot, measure);
-  const titleBaseline =
-    titleSlot.inkTop !== undefined
-      ? titleSlot.inkTop + inkAscent(ctx, family, fit.size, "Mk")
-      : (titleSlot.baselineY ?? 0);
+  const titleInkH = inkAscent(ctx, family, fit.size, "Mk") + inkDescent(ctx, family, fit.size);
+  const titleInkTop = divider + (bandH * 0.25 - titleInkH) / 2;
+  const titleBaseline = titleInkTop + inkAscent(ctx, family, fit.size, "Mk");
   let tx = titleSlot.x;
   for (const run of fit.runs) {
     ctx.fillStyle = run.color === "accent" ? colors.accent : colors.title;
@@ -523,31 +541,43 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
       : preset?.description != null
         ? preset.description
         : (data.description ?? "");
+  const metaReserve =
+    metaSlot && metaSlot.footer && metaFields.length > 0
+      ? metaSlot.footer.gap * canvasH +
+        inkAscent(ctx, family, metaSlot.size, "Mk") +
+        inkDescent(ctx, family, metaSlot.size)
+      : 0;
+  // Desc 在第四象限：墨顶到 x 轴（中线）的距离 = Project Name 墨顶到
+  // x 轴距离的一半（该约束不因 topline/title 分隔规则而废除）
+  const descInkTop = midline + (midline - titleInkTop) / 2;
+  const descBandBottom = bandBottom - metaReserve;
   let descLastBaseline: number | null = null;
   let descLastSize = descSlot.size;
   if (description) {
-    // description autoFit: when the wrapped lines exceed maxLines, the font
-    // scales down within [1.0, minScale] until they fit -- the vertical band
-    // (bandBottom) bounds how far the block may grow, so a long description
-    // renders completely instead of being cut to half its advertised capacity
+    // description autoFit（象限规范的释放阀）：描述必须装进自己的子带
+    // [descInkTop, descBandBottom]，装不下时字号在 [1.0, minScale] 内下探，
+    // 直到整个文本都在带内——300 字承诺由此兑现。仍放不下（触底）才省略。
+    const descBandLines = (s: number) =>
+      Math.max(1, Math.floor((descBandBottom - descInkTop) / (s * descSlot.size * descSlot.leading)));
+    const fitsBand = (w: { lines: string[] }, s: number): boolean =>
+      descInkTop + (w.lines.length - 1) * s * descSlot.size * descSlot.leading +
+        inkDescent(ctx, family, s * descSlot.size) <=
+      descBandBottom;
+
     let size = descSlot.size;
     let wrap = wrapDescription(description, descSlot, measure);
     const minScale =
       descSlot.autoFit?.mode === "scale-down" ? (descSlot.autoFit.minScale ?? 0.6) : 1;
-    // 自动缩排判据是「整个文本装进垂直版式带」：字号变小 → 行高变小 →
-    // 版式带能容纳的行数变多。固定 maxLines 作判据是反的（缩字号只会增加
-    // 行数，永远不成立）。
-    if (descSlot.autoFit && descSlot.bandBottom != null && wrap.ellipsized) {
-      const bandLines = (s: number) =>
-        Math.floor((descSlot.bandBottom! - descSlot.top) / (s * descSlot.size * descSlot.leading));
+    const baseOverflows = wrap.lines.length > descBandLines(1);
+    if (descSlot.autoFit && (wrap.ellipsized || baseOverflows)) {
       for (const s of descriptionFitSearch(descSlot, minScale)) {
         const cand = {
           ...descSlot,
           size: Math.round(descSlot.size * s * 100) / 100,
-          maxLines: bandLines(s),
+          maxLines: descBandLines(s),
         };
         const w = wrapDescription(description, cand, measure);
-        if (!w.ellipsized) {
+        if (!w.ellipsized && fitsBand(w, s)) {
           size = cand.size;
           wrap = w;
           break;
@@ -556,8 +586,7 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
     }
     ctx.fillStyle = colors.description;
     const firstBaseline =
-      descSlot.top +
-      (descSlot.firstBaselineOffset ?? inkAscent(ctx, family, size, "Akd"));
+      descInkTop + (descSlot.firstBaselineOffset ?? inkAscent(ctx, family, size, "Akd"));
     wrap.lines.forEach((line, i) => {
       drawTextRouted(
         ctx,
@@ -574,15 +603,12 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
     descLastSize = size;
   }
 
-  // metadata rows: anchored to the text block (topline above the title, footer
-  // below the description's last line) so a short description leaves no hole --
-  // this replaces the old fixed-position stats row
-  const metaSlot = template.slots.meta;
-  const metaFields: string[] = params.meta ?? declaredMetaFields(metaSlot);
+  // metadata rows: topline hangs above the title (its position is unaffected);
+  // the footer sits in the reserved band-bottom zone and is skipped when it
+  // would overflow (the description has priority over the metadata row)
   if (metaSlot && metaFields.length > 0) {
-    const canvasH = template.canvas.height;
     if (metaSlot.topline && metaSlot.topline.fields.length > 0) {
-      const anchor = titleSlot.inkTop ?? titleBaseline;
+      const anchor = titleInkTop;
       drawMetaRow(
         ctx,
         metaSlot,
@@ -602,19 +628,23 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
       const descInkBottom =
         descLastBaseline !== null
           ? descLastBaseline + inkDescent(ctx, family, descLastSize)
-          : descSlot.top + descSlot.size;
+          : (box.y + box.size) - metaReserve;
       const metaInkTop = inkAscent(ctx, family, metaSlot.size, "Mk");
-      drawMetaRow(
-        ctx,
-        metaSlot,
-        metaSlot.footer.fields.filter((f) => metaFields.includes(f)),
-        descSlot.x,
-        descInkBottom + metaSlot.footer.gap * canvasH + metaInkTop,
-        data,
-        colors,
-        router,
-        letterSpacingOk,
-      );
+      const footerInkBottom =
+        descInkBottom + metaSlot.footer.gap * canvasH + metaInkTop + inkDescent(ctx, family, metaSlot.size);
+      if (footerInkBottom <= bandBottom) {
+        drawMetaRow(
+          ctx,
+          metaSlot,
+          metaSlot.footer.fields.filter((f) => metaFields.includes(f)),
+          descSlot.x,
+          descInkBottom + metaSlot.footer.gap * canvasH + metaInkTop,
+          data,
+          colors,
+          router,
+          letterSpacingOk,
+        );
+      }
     }
   }
 

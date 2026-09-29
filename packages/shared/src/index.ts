@@ -4,7 +4,7 @@ import { z } from "zod";
 
 export const LIMITS = {
   titleChars: 80,
-  descriptionChars: 300,
+  descriptionChars: 200,
   /** absolute request URL cap. The legal worst case is a 300-character CJK
    * description (~2.7 KB once percent-encoded) plus path and host, so 2 KB
    * rejected requests the schema accepted. Measured: GitHub's camo chain

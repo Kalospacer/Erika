@@ -36,8 +36,7 @@
     },
     "description": {
       "x": 0.4884,
-      "top": 0.5616,
-      "bottom": 0.889
+      "top": 0.5616
     },
     "text": {
       "rightEdge": 0.9543
@@ -78,7 +77,7 @@
       },
       "autoFit": {
         "mode": "scale-down",
-        "minScale": 0.6
+        "minScale": 0.75
       }
     },
     "icon": {

@@ -41,6 +41,9 @@ try {
   }
   const metadata = await (await fetch(`${origin}/v1/meta`)).json();
   assert(metadata.templates.some((t) => t.id === "grokbot"));
+  const grokbot = metadata.templates.find((t) => t.id === "grokbot");
+  assert(grokbot.metaFields.includes("last_updated"));
+  assert(!grokbot.defaultMetaFields.includes("last_updated"));
   const url = `${origin}/v1/banner/Moemu/Erika.webp`;
   const banner = await fetch(url);
   assert.equal(banner.status, 200);
@@ -48,6 +51,11 @@ try {
   assert.equal(banner.headers.get("x-banner-icon"), "repo", "preset icon silently fell back");
   assert((await banner.arrayBuffer()).byteLength > 1000);
   assert.equal((await fetch(url, { headers: { "If-None-Match": banner.headers.get("etag") } })).status, 304);
+  const extra = await fetch(`${url}?meta=license,language,last_updated`);
+  assert.equal(extra.status, 200);
+  assert.equal(extra.headers.get("content-type"), "image/webp");
+  assert.notEqual(extra.headers.get("etag"), banner.headers.get("etag"), "selected metadata was not rendered");
+  assert((await extra.arrayBuffer()).byteLength > 1000);
   const themeEtags = [];
   for (const theme of ["light", "dark"]) {
     const themed = await fetch(`${origin}/v1/banner/Moemu/Erika.png?theme=${theme}&icon=builtin`);
@@ -62,7 +70,7 @@ try {
   assert.equal(missing.status, 200);
   assert.equal(missing.headers.get("x-banner-error"), "not-found");
   assert.equal(missing.headers.get("content-type"), "image/webp");
-  console.log("Docker smoke passed: static assets, nested SPA, API 404, repo icon, transparent themes, ETag, placeholder.");
+  console.log("Docker smoke passed: static assets, nested SPA, API 404, repo icon, selected metadata, transparent themes, ETag, placeholder.");
 } catch (error) {
   if (started) console.error(docker("logs", name));
   throw error;

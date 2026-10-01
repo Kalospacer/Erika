@@ -49,6 +49,16 @@ const cases = [
     { id: `erika-transparent-${theme}`, template: "grokbot", repo: "Moemu/Erika", data: erika, asset: "erika-transparent.png", kind: "repo", params: { theme } },
     { id: `erika-opaque-${theme}`, template: "grokbot", repo: "Moemu/Erika", data: erika, asset: "erika.webp", kind: "repo", params: { theme } },
   ]),
+  ...["light", "dark"].map((theme) => ({
+    id: `metadata-${theme}`, template: "grokbot", repo: "Moemu/Erika",
+    data: { ...erika, licenseSpdxId: "MIT", language: "TypeScript", pushedAt: "2026-10-01T00:00:00Z" },
+    asset: "erika-transparent.png", kind: "repo", params: { theme, meta: ["full_name", "license", "language", "last_updated"] },
+  })),
+  {
+    id: "metadata-long", template: "avatar",
+    data: { ...stranger, licenseSpdxId: "GPL-3.0-or-later", language: "A very long language name with 中文字符", pushedAt: "2026-10-01T00:00:00Z" },
+    kind: "avatar", params: { theme: "light", meta: ["full_name", "stars", "forks", "issues", "release", "license", "language", "last_updated"] },
+  },
   { id: "avatar-zh-light", template: "avatar", data: { fullName: "Example/Project", name: "中文项目与长标题排版", description: "这是固定的中文描述，用来检查字体回退、换行和图文间距。\nA fixed bilingual description for visual regression." }, kind: "avatar", params: { theme: "light" } },
 ];
 mkdirSync(update ? baselines : output, { recursive: true });

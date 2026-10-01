@@ -19,7 +19,7 @@ import {
   type MeasureFn,
 } from "./layout.js";
 import { captureBackgroundColor, presetIconPaths } from "./icons.js";
-import { formatNumber } from "./format.js";
+import { defaultMetaFields, fitMetadataRow, metadataSegments } from "./metadata.js";
 import type {
   BannerData,
   DescriptionSlot,
@@ -249,13 +249,7 @@ function drawIssue(ctx: Ctx, cx: number, cy: number, r: number): void {
   ctx.fill();
 }
 
-/** Fields a template declares across both metadata zones. */
-export function declaredMetaFields(slot: MetaSlot | null): MetaField[] {
-  if (!slot) return [];
-  return [
-    ...new Set([...(slot.topline?.fields ?? []), ...(slot.footer?.fields ?? [])]),
-  ];
-}
+export { declaredMetaFields, defaultMetaFields } from "./metadata.js";
 
 /** One metadata row: glyph+value segments separated by `separator`. Fields
  * without data are skipped, so the row never renders a dangling label. */
@@ -269,22 +263,9 @@ function drawMetaRow(
   colors: ThemeColors,
   router: FontRouter,
   letterSpacingOk: boolean,
+  maxWidth: number,
 ): void {
-  const size = slot.size;
-  const segments: Array<{ text: string; glyph?: "star" | "fork" | "issue" | "tag" }> = [];
-  for (const field of fields) {
-    if (field === "stars" && data.stargazersCount != null) {
-      segments.push({ text: formatNumber(data.stargazersCount), glyph: "star" });
-    } else if (field === "forks" && data.forksCount != null) {
-      segments.push({ text: formatNumber(data.forksCount), glyph: "fork" });
-    } else if (field === "issues" && data.openIssuesCount != null) {
-      segments.push({ text: formatNumber(data.openIssuesCount), glyph: "issue" });
-    } else if (field === "release" && data.releaseTag) {
-      segments.push({ text: data.releaseTag, glyph: "tag" });
-    } else if (field === "full_name" && data.fullName) {
-      segments.push({ text: data.fullName });
-    }
-  }
+  const { size, segments } = fitMetadataRow(metadataSegments(fields, data), slot, maxWidth, makeMeasurer(ctx, router));
   const glyphCy = baseline - size * 0.3;
   let cursor = x;
   segments.forEach((segment, i) => {
@@ -302,6 +283,9 @@ function drawMetaRow(
       if (segment.glyph === "star") drawStar(ctx, cursor + r, glyphCy, r);
       else if (segment.glyph === "fork") drawFork(ctx, cursor + r, glyphCy, r);
       else if (segment.glyph === "tag") drawTag(ctx, cursor + r, glyphCy, r);
+      else if (segment.glyph === "license") drawLicense(ctx, cursor + r, glyphCy, r);
+      else if (segment.glyph === "code") drawCode(ctx, cursor + r, glyphCy, r);
+      else if (segment.glyph === "clock") drawClock(ctx, cursor + r, glyphCy, r);
       else drawIssue(ctx, cursor + r, glyphCy, r);
       cursor += r * 2 + size * 0.18;
     }
@@ -310,6 +294,48 @@ function drawMetaRow(
       ctx, segment.text, cursor, baseline, size, slot.tracking, router, letterSpacingOk,
     );
   });
+}
+
+function drawLicense(ctx: Ctx, cx: number, cy: number, r: number): void {
+  ctx.strokeStyle = ctx.fillStyle;
+  ctx.lineWidth = r * 0.2;
+  ctx.strokeRect(cx - r * 0.65, cy - r * 0.85, r * 1.3, r * 1.7);
+  for (const offset of [-0.35, 0.1, 0.55]) {
+    ctx.beginPath();
+    ctx.moveTo(cx - r * 0.35, cy + r * offset);
+    ctx.lineTo(cx + r * 0.35, cy + r * offset);
+    ctx.stroke();
+  }
+}
+
+function drawCode(ctx: Ctx, cx: number, cy: number, r: number): void {
+  ctx.strokeStyle = ctx.fillStyle;
+  ctx.lineWidth = r * 0.22;
+  ctx.beginPath();
+  for (const direction of [-1, 1]) {
+    ctx.moveTo(cx + direction * r * 0.45, cy - r * 0.65);
+    ctx.lineTo(cx + direction * r * 0.9, cy);
+    ctx.lineTo(cx + direction * r * 0.45, cy + r * 0.65);
+  }
+  ctx.moveTo(cx + r * 0.2, cy - r * 0.8);
+  ctx.lineTo(cx - r * 0.2, cy + r * 0.8);
+  ctx.stroke();
+}
+
+function drawClock(ctx: Ctx, cx: number, cy: number, r: number): void {
+  ctx.save();
+  ctx.strokeStyle = ctx.fillStyle;
+  ctx.lineWidth = r * 0.2;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.arc(cx, cy, r * 0.82, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - r * 0.48);
+  ctx.lineTo(cx, cy);
+  ctx.lineTo(cx + r * 0.38, cy + r * 0.2);
+  ctx.stroke();
+  ctx.restore();
 }
 
 /** Price-tag glyph for the release field: a slim tag with a round tip and a
@@ -538,7 +564,8 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
   const measure = makeMeasurer(ctx, router);
   const letterSpacingOk = "letterSpacing" in ctx;
   const metaSlot = template.slots.meta;
-  const metaFields: string[] = params.meta ?? declaredMetaFields(metaSlot);
+  const metaFields: string[] = params.meta ?? defaultMetaFields(metaSlot);
+  const footerFields = metaSlot?.footer?.fields.filter((field) => metaFields.includes(field)) ?? [];
   const canvasH = template.canvas.height;
 
   // ---- 文本列垂直版式（紧凑栈）----
@@ -593,7 +620,7 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
   // wrapping, so the span survives re-wrapping without costing any width
   const { text: description, spans: descriptionSpans } = parseAccentMarkers(rawDescription);
   const metaReserve =
-    metaSlot && metaSlot.footer && metaFields.length > 0
+    metaSlot && metaSlot.footer && metadataSegments(footerFields, data).length > 0
       ? metaSlot.footer.gap * canvasH +
         inkAscent(ctx, family, metaSlot.size, "Mk") +
         inkDescent(ctx, family, metaSlot.size)
@@ -692,6 +719,7 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
         colors,
         router,
         letterSpacingOk,
+        titleSlot.maxWidth,
       );
     }
     if (metaSlot.footer && metaSlot.footer.fields.length > 0) {
@@ -716,6 +744,7 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
           colors,
           router,
           letterSpacingOk,
+          descSlot.maxWidth,
         );
       }
     }

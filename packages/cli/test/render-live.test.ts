@@ -12,7 +12,7 @@ const TINY_PNG = Buffer.from(
   "base64",
 );
 
-function gh200() {
+function gh200(overrides: Record<string, unknown> = {}) {
   return new Response(
     JSON.stringify({
       full_name: "Some/One",
@@ -22,12 +22,32 @@ function gh200() {
       forks_count: 0,
       private: false,
       owner: { avatar_url: "https://avatars.githubusercontent.com/u/99?v=4" },
+      ...overrides,
     }),
     { status: 200, headers: { etag: '"e1"' } },
   );
 }
 
 describe("render-live", () => {
+  it("renders selected metadata using only the existing repo request", async () => {
+    const dir = resolve("out/render-live-test");
+    mkdirSync(dir, { recursive: true });
+    let calls = 0;
+    const fetchImpl = (async () => {
+      calls++;
+      return gh200({ license: { spdx_id: "MIT" }, language: "TypeScript", pushed_at: "2026-10-01T00:00:00Z" });
+    }) as typeof fetch;
+    const render = async (meta: string, filename: string) => {
+      const out = join(dir, filename);
+      await renderLiveCommand(
+        { owner: "Some", repo: "One", out, meta, scale: "0.2", icon: join(DEFAULT_TEMPLATES_DIR, "assets", "erika.webp") },
+        { templatesDir: DEFAULT_TEMPLATES_DIR, presetsPath: DEFAULT_PRESETS_PATH }, { fetchImpl },
+      );
+      return readFileSync(out);
+    };
+    expect(await render("license,language,last_updated", "metadata.png")).not.toEqual(await render("", "no-metadata.png"));
+    expect(calls).toBe(2);
+  });
   it("runs the Actions example from a separate user's checkout", () => {
     const workflow = readFileSync(join(REPO_ROOT, "docs/examples/refresh-banner.yml"), "utf8");
     const setting = (key: string) => {

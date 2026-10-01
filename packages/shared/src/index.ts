@@ -29,7 +29,7 @@ export const LIMITS = {
 } as const;
 
 /** Metadata fields a template can declare in its topline/footer zones. */
-export const META_FIELDS = ["stars", "forks", "issues", "release", "full_name"] as const;
+export const META_FIELDS = ["stars", "forks", "issues", "release", "full_name", "license", "language", "last_updated"] as const;
 export type MetaField = (typeof META_FIELDS)[number];
 
 export const FORMATS = ["webp", "png"] as const;

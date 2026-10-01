@@ -12,7 +12,8 @@ globalThis.fetch = async (input) => {
       full_name: "Moemu/Erika", name: "Erika",
       description: "A deterministic container smoke test", default_branch: "main",
       private: false, stargazers_count: 42, forks_count: 3, open_issues_count: 2,
-    }, { headers: { etag: '"fixture-v1"' } });
+      license: { spdx_id: "MIT" }, language: "TypeScript", pushed_at: "2026-10-01T00:00:00Z",
+    }, { headers: { etag: '"fixture-v2"' } });
   }
   // pinned exactly: the preset's declared path is part of the public contract,
   // so a wrong URL must fail instead of being accepted by the fixture

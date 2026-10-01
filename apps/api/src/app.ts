@@ -33,6 +33,7 @@ import {
   createImageFetcher,
   builtinIconPathFor,
   declaredMetaFields,
+  defaultMetaFields,
   isRepoRelativePath,
   presetIconPaths,
   repoIconUrlsFor,
@@ -203,7 +204,7 @@ export function createApp(deps: ApiDeps) {
     const declaredFields = declaredMetaFields(template.slots.meta);
     let metaFields: MetaField[];
     if (q.meta === undefined) {
-      metaFields = declaredFields as MetaField[];
+      metaFields = defaultMetaFields(template.slots.meta);
     } else {
       const unknown = q.meta.filter((f) => !(META_FIELDS as readonly string[]).includes(f));
       if (unknown.length > 0) {
@@ -409,7 +410,7 @@ GET /v1/banner/:owner/:repo/:template.webp</code></pre>
               { name: "theme", in: "query", schema: { type: "string" } },
               { name: "title", in: "query", schema: { type: "string", maxLength: LIMITS.titleChars } },
               { name: "description", in: "query", schema: { type: "string", maxLength: LIMITS.descriptionChars } },
-              { name: "meta", in: "query", description: "Comma-separated fields; empty string hides all metadata. Omit to use template defaults.", schema: { type: "string", example: "stars,forks,release" } },
+              { name: "meta", in: "query", description: `Comma-separated fields: ${META_FIELDS.join(", ")}. Empty string hides all metadata. Omit to use template defaults. last_updated is the UTC code push date.`, schema: { type: "string", example: "license,language,last_updated" } },
               { name: "icon", in: "query", schema: { enum: ["auto", "avatar", "builtin"] } },
               { name: "iconPath", in: "query", schema: { type: "string", example: "assets/grokbot-icon.webp" } },
               { name: "iconFit", in: "query", schema: { enum: ["contain", "cover"] } },

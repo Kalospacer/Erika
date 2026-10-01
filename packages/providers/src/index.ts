@@ -13,6 +13,10 @@ export interface RepoData {
   openIssuesCount?: number;
   /** latest release tag (lazy: only fetched when a template displays it) */
   releaseTag?: string | null;
+  licenseSpdxId?: string | null;
+  language?: string | null;
+  /** Latest code push timestamp from GitHub's pushed_at. */
+  pushedAt?: string | null;
   avatarUrl?: string;
   defaultBranch?: string;
   private: boolean;
@@ -94,6 +98,7 @@ function stableVersion(data: RepoData): string {
     data.fullName, data.name, data.description,
     data.stargazersCount ?? null, data.forksCount ?? null, data.openIssuesCount ?? null,
     data.avatarUrl ?? null,
+    data.licenseSpdxId ?? null, data.language ?? null, data.pushedAt ?? null,
   ]);
   return Buffer.from(payload).toString("base64url");
 }
@@ -194,6 +199,7 @@ export function createGitHubProvider(options: ProviderOptions = {}): GitHubProvi
       log(`refusing private repo ${repoKey}`);
       throw new NotFoundError(repoKey);
     }
+    const license = body.license as { spdx_id?: unknown } | null | undefined;
     const data: RepoData = {
       fullName: String(body.full_name ?? repoKey),
       name: String(body.name ?? repoKey.split("/")[1]),
@@ -201,6 +207,10 @@ export function createGitHubProvider(options: ProviderOptions = {}): GitHubProvi
       stargazersCount: typeof body.stargazers_count === "number" ? body.stargazers_count : undefined,
       forksCount: typeof body.forks_count === "number" ? body.forks_count : undefined,
       openIssuesCount: typeof body.open_issues_count === "number" ? body.open_issues_count : undefined,
+      licenseSpdxId: typeof license?.spdx_id === "string" && license.spdx_id !== "NOASSERTION"
+        ? license.spdx_id : null,
+      language: typeof body.language === "string" ? body.language : null,
+      pushedAt: typeof body.pushed_at === "string" ? body.pushed_at : null,
       avatarUrl: typeof (body.owner as Record<string, unknown> | undefined)?.avatar_url === "string"
         ? ((body.owner as Record<string, unknown>).avatar_url as string)
         : undefined,

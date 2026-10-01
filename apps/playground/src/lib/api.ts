@@ -12,6 +12,7 @@ export interface TemplateInfo {
   sources: string[];
   /** metadata fields the template declares */
   metaFields: string[];
+  defaultMetaFields?: string[];
 }
 
 export interface Meta {

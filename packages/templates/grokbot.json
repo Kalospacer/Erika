@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "grokbot",
-  "version": 2,
+  "version": 3,
   "capabilities": {
     "autoFit": true,
     "manualLineBreaks": true,
@@ -95,6 +95,7 @@
       }
     },
     "meta": {
+      "defaultFields": ["full_name", "stars", "forks", "issues", "release"],
       "size": 56,
       "tracking": 0.04,
       "color": "stats",
@@ -112,7 +113,10 @@
           "stars",
           "forks",
           "issues",
-          "release"
+          "release",
+          "license",
+          "language",
+          "last_updated"
         ]
       }
     }

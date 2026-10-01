@@ -222,7 +222,7 @@ describe("GET /v1/meta", () => {
     const res = await app.request("/v1/meta");
     expect(res.status).toBe(200);
     const meta = (await res.json()) as {
-      templates: Array<{ id: string; capabilities: { metadata: boolean }; sources: string[]; metaFields: string[] }>;
+      templates: Array<{ id: string; capabilities: { metadata: boolean }; sources: string[]; metaFields: string[]; defaultMetaFields: string[] }>;
       metaFields: string[];
     };
     const ids = meta.templates.map((t) => t.id);
@@ -231,12 +231,34 @@ describe("GET /v1/meta", () => {
     const grokbot = meta.templates.find((t) => t.id === "grokbot")!;
     expect(grokbot.capabilities.metadata).toBe(true);
     expect(grokbot.sources).toEqual(["repo", "builtin"]);
-    expect(grokbot.metaFields).toEqual(["full_name", "stars", "forks", "issues", "release"]);
+    expect(grokbot.metaFields).toEqual(["full_name", "stars", "forks", "issues", "release", "license", "language", "last_updated"]);
+    expect(grokbot.defaultMetaFields).toEqual(["full_name", "stars", "forks", "issues", "release"]);
     expect(meta.metaFields).toContain("release");
   });
 });
 
 describe("review regressions", () => {
+  it("accepts new fields on both templates, preserves defaults and refreshes their image ETags", async () => {
+    const original = snapshot(9, "metadata");
+    original.data = { ...original.data, licenseSpdxId: "MIT", language: "TypeScript", pushedAt: "2026-09-30T00:00:00Z" };
+    const queue = [original, snapshot(9), original, original];
+    const app = buildApp(queue);
+    const defaults = await app.request("/v1/banner/Moemu/Erika.png?scale=0.2");
+    const noExtras = await app.request("/v1/banner/Moemu/Erika.png?scale=0.2");
+    expect(defaults.headers.get("etag")).toBe(noExtras.headers.get("etag"));
+    const url = "/v1/banner/Moemu/Erika.png?scale=0.2&meta=license,language,last_updated";
+    const selected = await app.request(url);
+    expect(selected.status).toBe(200);
+    expect(selected.headers.get("etag")).not.toBe(defaults.headers.get("etag"));
+    const avatar = await app.request("/v1/banner/Moemu/Erika/avatar.png?scale=0.2&icon=builtin&meta=license,language,last_updated");
+    expect(avatar.status).toBe(200);
+    for (const change of [{ licenseSpdxId: "Apache-2.0" }, { language: "Python" }, { pushedAt: "2026-10-01T00:00:00Z" }]) {
+      queue.push({ ...original, version: JSON.stringify(change), data: { ...original.data, ...change } });
+      const updated = await app.request(url);
+      expect(updated.status).toBe(200);
+      expect(updated.headers.get("etag")).not.toBe(selected.headers.get("etag"));
+    }
+  });
   let queue: Array<RepoSnapshot | Error>;
   let app: ReturnType<typeof buildApp>;
   beforeEach(() => {

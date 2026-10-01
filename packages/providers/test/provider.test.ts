@@ -38,6 +38,35 @@ function makeFetch(script: Array<(url: string, init?: RequestInit) => Response>)
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 describe("createGitHubProvider", () => {
+  it("maps metadata in one request and changes the snapshot version when each field changes", async () => {
+    let clock = 0;
+    let body = repoBody({ license: { spdx_id: "MIT" }, language: "TypeScript", pushed_at: "2026-09-30T00:00:00Z" });
+    let calls = 0;
+    const provider = createGitHubProvider({ now: () => clock, freshTtlMs: 1, maxStaleMs: 2, fetchImpl: async () => {
+      calls++;
+      return ghResponse(body);
+    } });
+    let snap = await provider.getRepo("Moemu", "Erika");
+    expect(snap.data).toMatchObject({ licenseSpdxId: "MIT", language: "TypeScript", pushedAt: "2026-09-30T00:00:00Z" });
+    await provider.getRepo("Moemu", "Erika");
+    expect(calls).toBe(1);
+    for (const change of [{ license: { spdx_id: "Apache-2.0" } }, { language: "Python" }, { pushed_at: "2026-10-01T00:00:00Z" }]) {
+      body = { ...body, ...change };
+      clock += 10;
+      const next = await provider.getRepo("Moemu", "Erika");
+      expect(next.version).not.toBe(snap.version);
+      snap = next;
+    }
+    expect(calls).toBe(4);
+  });
+
+  it("handles missing metadata and an unrecognized license", async () => {
+    for (const license of [null, { spdx_id: "NOASSERTION" }]) {
+      const provider = createGitHubProvider({ fetchImpl: async () => ghResponse(repoBody({ license, language: null, pushed_at: null })) });
+      const snap = await provider.getRepo("Moemu", "Erika");
+      expect(snap.data).toMatchObject({ licenseSpdxId: null, language: null, pushedAt: null });
+    }
+  });
   it("sends the token as a bearer header and revalidates with If-None-Match", async () => {
     const seen: Array<{ auth?: string; inm?: string | null }> = [];
     let call = 0;

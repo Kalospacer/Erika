@@ -120,6 +120,8 @@ export interface MetaFooter {
 }
 
 export interface MetaSlot {
+  /** Fields shown when meta is omitted; defaults to all declared fields. */
+  defaultFields?: MetaField[];
   /** glyph+value size in canvas units */
   size: number;
   tracking: number;
@@ -189,6 +191,10 @@ export interface BannerData {
   openIssuesCount?: number;
   /** latest release tag, fetched lazily when a template displays it */
   releaseTag?: string | null;
+  licenseSpdxId?: string | null;
+  language?: string | null;
+  /** Latest code push timestamp, formatted as a UTC date by last_updated. */
+  pushedAt?: string | null;
   defaultBranch?: string;
   private?: boolean;
 }

@@ -111,6 +111,10 @@ https://erika.snowy.moe/v1/banner/Moemu/Erika.webp?meta=stars,release
 
 省略 `meta` 使用模板默认字段；写成 `?meta=` 则隐藏全部仓库信息字段。
 
+Grokbot 和 Avatar 模板还支持 `license`、`language`、`last_updated`，可在 Playground 中勾选，或使用 `?meta=license,language,last_updated`。默认仍显示仓库全名、Star、Fork、Issue 和 Release。
+
+`license` 显示 GitHub 识别的 SPDX 标识；未识别的许可证不显示。`language` 显示主要语言。`last_updated` 使用仓库的 `pushed_at`，按 UTC 显示为 `YYYY-MM-DD`。这些字段来自现有仓库请求，不增加请求次数。缺失字段会跳过；过长的元数据行先缩小字号，再省略过长的值。
+
 描述里可以用 `**…**` 标记一段强调文字：成对出现时该段用主题的强调色绘制，标记本身不参与排版度量（不占宽度、不影响换行与自动缩排）；落单的 `**` 按字面输出。例如 `?description=An **event-loop** chatbot`。
 
 ## 部署📦
@@ -185,7 +189,7 @@ docker run -d --name erika -p 8787:8787 --env-file .env erika:local
 | `iconRound` | `1` 启用圆形遮罩，`0` 关闭 |
 | `title` | 覆盖标题，最长 25 个字符（版式在该长度下仍完整显示） |
 | `description` | 覆盖描述，最长 180 个字符（超出 0.75 倍下限的排版容量会截断） |
-| `meta` | 逗号分隔的字段：`full_name`、`stars`、`forks`、`issues`、`release`；需由所选模板支持 |
+| `meta` | 逗号分隔的字段：`full_name`、`stars`、`forks`、`issues`、`release`、`license`、`language`、`last_updated`；需由所选模板支持 |
 | `scale` | 缩放比例，范围为 0.1～1；默认 0.5，输出 1500 × 900 图片 |
 | `lang` | 错误占位图语言，`en` / `zh`，默认 `en` |
 | `fresh` | `fresh=1` 让响应使用 `Cache-Control: no-cache`，便于检查源站响应 |

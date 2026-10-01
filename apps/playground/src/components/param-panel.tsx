@@ -15,6 +15,9 @@ const META_LABELS: Record<string, string> = {
   issues: "Issue",
   release: "Release",
   full_name: "仓库全名",
+  license: "许可证",
+  language: "主要语言",
+  last_updated: "代码更新日期",
 };
 
 export function ParamPanel({
@@ -39,7 +42,7 @@ export function ParamPanel({
   const scaleMin = limits?.scaleMin ?? 0.1;
   const declaredMeta = template?.metaFields ?? [];
   const effectiveMeta =
-    state.meta === null ? declaredMeta : state.meta.split(",").map((f) => f.trim()).filter(Boolean);
+    state.meta === null ? (template?.defaultMetaFields ?? declaredMeta) : state.meta.split(",").map((f) => f.trim()).filter(Boolean);
   const toggleMeta = (field: string, on: boolean) => {
     const next = on ? [...effectiveMeta, field] : effectiveMeta.filter((f) => f !== field);
     patch({ meta: next.join(",") });

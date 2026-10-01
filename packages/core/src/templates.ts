@@ -4,6 +4,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { IconBox, IconSlot, Preset, RatioIconBox, Template } from "./types.js";
+import { declaredMetaFields, defaultMetaFields } from "./metadata.js";
 
 /** Repo root, derived from this module's compiled location (dist/ -> package -> packages -> root). */
 export const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
@@ -91,6 +92,7 @@ export interface TemplateInfo {
   sources: string[];
   /** metadata fields the template declares (topline + footer) */
   metaFields: string[];
+  defaultMetaFields: string[];
 }
 
 /** Enumerate renderable templates in a directory (schemaVersion + id required). */
@@ -110,10 +112,8 @@ export function listTemplates(templatesDir = DEFAULT_TEMPLATES_DIR): TemplateInf
           formats: ["webp", "png"],
           canvas: { ...(tpl.canvas ?? { width: 0, height: 0 }) },
           sources: [...(tpl.slots.icon.sources ?? [])],
-          metaFields: [...new Set([
-            ...(tpl.slots.meta?.topline?.fields ?? []),
-            ...(tpl.slots.meta?.footer?.fields ?? []),
-          ])],
+          metaFields: declaredMetaFields(tpl.slots.meta),
+          defaultMetaFields: defaultMetaFields(tpl.slots.meta),
         });
       }
     } catch {

@@ -18,7 +18,7 @@ import {
   wrapDescription,
   type MeasureFn,
 } from "./layout.js";
-import { captureBackgroundColor } from "./icons.js";
+import { captureBackgroundColor, presetIconPaths } from "./icons.js";
 import { formatNumber } from "./format.js";
 import type {
   BannerData,
@@ -430,8 +430,12 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
   const titleSlot = template.slots.title;
   const descSlot = template.slots.description;
   // icon source resolution happens early: background capture needs the pixels
-  const iconSource =
-    input.iconOverride ?? (preset?.icon?.path ? { path: preset.icon.path, kind: "repo" as const } : null);
+  let iconSource = input.iconOverride;
+  if (!iconSource) {
+    const presetPaths = presetIconPaths(preset, params.theme);
+    const presetPath = presetPaths.find(existsSync) ?? presetPaths[0];
+    if (presetPath) iconSource = { path: presetPath, kind: "repo" };
+  }
   let iconImg: Awaited<ReturnType<typeof loadImage>> | null = null;
   if (iconSource?.buffer) {
     iconImg = await loadImage(iconSource.buffer);
@@ -442,10 +446,8 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
     iconImg = await loadImage(iconSource.path);
   }
 
-  // theme resolution: an explicit theme fixes background AND palette (no
-  // capture). With no explicit theme, the icon's own background color is
-  // captured and adopted (the PSD technique); the foreground palette is chosen
-  // by captured luminance, keeping preset brand overrides (accent etc.).
+  // An explicit theme fixes the palette, while artwork inspection determines
+  // placement independently. Auto mode may also adopt the artwork backdrop.
   const explicitThemeName = params.theme || null; // only a non-empty query theme is explicit
   if (explicitThemeName !== null && !template.themes[explicitThemeName]) {
     throw new Error(`unknown theme "${explicitThemeName}"; available: ${Object.keys(template.themes).join(", ")}`);
@@ -454,35 +456,19 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
   // corner colour must never repaint the canvas (avatars take the card path)
   const BOT_ICON_KINDS = new Set(["repo", "builtin"]);
   const botIcon = BOT_ICON_KINDS.has(iconSource?.kind ?? "");
-  const captureAllowed = explicitThemeName === null && params.bgCapture !== false && botIcon;
+  const captureAllowed = params.bgCapture !== false && botIcon;
   const captured =
     captureAllowed && iconImg ? captureBackgroundColor(iconImg) : null;
 
-  // icon archetype routing (design doc 5.3):
-  // - blend: the drawn image is a Grokbot-style artwork (flat backdrop -- the
-  //   project's own icon or the template default). The template's ratio box
-  //   places it and the captured backdrop colour becomes the canvas colour, so
-  //   the artwork blends full-bleed like the PSD originals.
-  // - card: any opaque image (GitHub avatars). The template's card box keeps
-  //   the designed gap to the text column.
-  // Display follows the active box (+ iconFit/iconRound params), never the source.
+  // Flat or transparent artwork keeps its blend geometry across themes.
+  // Complex images and avatars keep the contained card geometry.
   const blendBox = template.slots.iconBlend ?? null;
-  const blended = blendBox !== null && botIcon && captured?.color != null;
-  const box: IconBox = blended ? (blendBox as IconBox) : template.slots.icon;
-  // explicit iconRound: true = circle inside the active box, false = square
-  // (overrides a template radius); undefined = template default
-  const roundRadius =
-    params.iconRound === undefined ? null : params.iconRound ? box.size / 2 : 0;
-  const display = {
-    fit: params.iconFit ?? box.fit,
-    padding: box.padding ?? 0,
-    radius: roundRadius ?? box.radius,
-    position: box.position ?? { x: 0.5, y: 0.5 },
-  };
+  const artwork = blendBox !== null && botIcon && (captured?.color != null || captured?.transparent === true);
+  const box: IconBox = artwork ? blendBox! : template.slots.icon;
 
   let paletteName: string;
   let background: string;
-  if (captured?.color) {
+  if (explicitThemeName === null && captured?.color) {
     const luma =
       0.2126 * parseInt(captured.color.slice(1, 3), 16) +
       0.7152 * parseInt(captured.color.slice(3, 5), 16) +
@@ -503,6 +489,30 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
     ...template.themes[paletteName],
     ...(preset?.themeOverrides?.[paletteName] ?? {}),
     background,
+  };
+
+  // Small encoding differences are compatible; unlike auto mode, explicit
+  // themes never replace their background with the sampled colour.
+  const rgb = (color: string): [number, number, number] | null => /^#[0-9a-f]{6}$/iu.test(color)
+    ? [parseInt(color.slice(1, 3), 16), parseInt(color.slice(3, 5), 16), parseInt(color.slice(5, 7), 16)]
+    : null;
+  const sourceRgb = captured?.color ? rgb(captured.color) : null;
+  const themeRgb = rgb(colors.background);
+  const matches = sourceRgb !== null && themeRgb !== null &&
+    sourceRgb.every((channel, i) => Math.abs(channel - themeRgb[i]) <= 8);
+  const frame = artwork && explicitThemeName !== null && captured?.color
+    ? template.slots.icon.frame
+    : undefined;
+  const padding = Math.max(box.padding ?? 0, frame?.padding ?? 0);
+  const imageSize = box.size * (1 - padding * 2);
+  const radius = params.iconRound === undefined
+    ? frame && !matches ? imageSize * frame.radius : box.radius
+    : params.iconRound ? imageSize / 2 : 0;
+  const display = {
+    fit: params.iconFit ?? box.fit,
+    padding,
+    radius,
+    position: box.position ?? { x: 0.5, y: 0.5 },
   };
 
   const family = resolveFontChain(
@@ -541,8 +551,11 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
   //   x 轴距离的一半（此约束持续有效）。
   // - 带底部预留给 metadata footer（如声明并启用）；未启用时描述动态字号
   //   调节用满剩余空间。
-  const bandTop = box.y;
-  const bandBottom = box.y + box.size;
+  // Theme variants may use different materials; the template's artwork band
+  // keeps the text anchored even when one variant needs the smaller card box.
+  const bandBox = explicitThemeName !== null && botIcon && blendBox && params.bgCapture !== false ? blendBox : box;
+  const bandTop = bandBox.y;
+  const bandBottom = bandBox.y + bandBox.size;
   const bandH = bandBottom - bandTop;
   const divider = bandTop + bandH * 0.25; // 上 25% 基线：topline / title 分隔
   const midline = bandTop + bandH / 2; // x 轴：Desc 距离的基准线
@@ -688,7 +701,7 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
       const descInkBottom =
         descLastBaseline !== null
           ? descLastBaseline + inkDescent(ctx, family, descLastSize)
-          : (box.y + box.size) - metaReserve;
+          : bandBottom - metaReserve;
       const metaInkTop = inkAscent(ctx, family, metaSlot.size, "Mk");
       const footerInkBottom =
         descInkBottom + metaSlot.footer.gap * canvasH + metaInkTop + inkDescent(ctx, family, metaSlot.size);

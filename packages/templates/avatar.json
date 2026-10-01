@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "avatar",
-  "version": 1,
+  "version": 2,
   "extends": "grokbot",
   "layout": {
     "iconCard": { "x": 0.076, "centerY": 0.5, "size": 0.332, "fit": "contain" },

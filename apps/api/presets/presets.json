@@ -5,7 +5,8 @@
     "title": "Erika",
     "description": null,
     "icon": {
-      "path": "assets/erika-icon.webp"
+      "path": "assets/erika-icon.webp",
+      "pathTransparent": "assets/erika-icon-transparent.png"
     },
     "theme": "dark",
     "themeOverrides": {

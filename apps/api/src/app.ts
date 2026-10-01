@@ -31,8 +31,10 @@ import {
 import { RenderCache, RenderQueue, QueueOverflowError, SingleFlight, etagOf, sha256hex } from "./render-cache.js";
 import {
   createImageFetcher,
+  builtinIconPathFor,
   declaredMetaFields,
   isRepoRelativePath,
+  presetIconPaths,
   repoIconUrlsFor,
   resolveIconChain,
   type ImageFetcher,
@@ -86,13 +88,14 @@ export function createApp(deps: ApiDeps) {
   const templatesDir = deps.templatesDir ?? DEFAULT_TEMPLATES_DIR;
   const presetsPath = deps.presetsPath ?? join(templatesDir, "..", "..", "apps", "api", "presets", "presets.json");
   const fontsDir = deps.fontsDir ?? join(templatesDir, "fonts");
-  const builtinIconPath = deps.builtinIconPath ?? join(templatesDir, "assets", "erika.webp");
+  const builtinIconPath = deps.builtinIconPath ?? builtinIconPathFor(templatesDir);
+  const themedBuiltinIconPath = deps.builtinIconPath ?? builtinIconPathFor(templatesDir, "light");
   // the default icon's *content* is part of the render cache key: replacing the
   // asset must invalidate cached renders (a constant "builtin" fingerprint would
   // keep serving the old artwork until the LRU evicted it)
-  const builtinFingerprint = existsSync(builtinIconPath)
-    ? sha256hex(readFileSync(builtinIconPath).toString("base64")).slice(0, 12)
-    : "missing";
+  const builtinFingerprints = new Map([...new Set([builtinIconPath, themedBuiltinIconPath])].map((path) => [
+    path, existsSync(path) ? sha256hex(readFileSync(path).toString("base64")).slice(0, 12) : "missing",
+  ]));
   const registry: PresetRegistry = loadPresetRegistry(presetsPath);
   const imageFetcher = deps.imageFetcher ?? createImageFetcher({ log });
   const cache = new RenderCache(deps.cacheMaxBytes ?? LIMITS.renderCacheMB * 1024 * 1024);
@@ -188,8 +191,7 @@ export function createApp(deps: ApiDeps) {
     } catch {
       return c.json({ error: `unknown template "${requestedId}"` }, 400);
     }
-    // an omitted theme means AUTO (background capture); only an explicit
-    // query theme locks background + palette
+    // An explicit theme locks the palette; artwork placement is independent.
     if (q.theme && !template.themes[q.theme]) {
       return c.json({ error: `unknown theme "${q.theme}"; available: ${Object.keys(template.themes).join(", ")}` }, 400);
     }
@@ -281,23 +283,23 @@ export function createApp(deps: ApiDeps) {
 
     // icon resolution: the subject repo's own icon (public interface: a
     // conventional path in that repo, overridable) then the default Grokbot icon
-    const repoIconPath =
-      preset?.icon?.pathLight && q.theme === "light" ? preset.icon.pathLight : preset?.icon?.path;
-    if (repoIconPath && !isRepoRelativePath(repoIconPath)) {
-      log(`preset icon path "${repoIconPath}" is not repo-relative; probing the conventional paths instead`);
+    const repoIconPaths = presetIconPaths(preset, q.theme);
+    for (const path of repoIconPaths.filter((path) => !isRepoRelativePath(path))) {
+      log(`preset icon path "${path}" is not repo-relative; ignoring it`);
     }
     const repoIconUrls = repoIconUrlsFor({
       owner,
       repo,
       branch: data.defaultBranch,
-      explicit: q.iconPath ?? repoIconPath,
+      explicit: q.iconPath ?? repoIconPaths,
     });
     const iconOrder =
       iconSource === "avatar" ? ["avatar"] : iconSource === "builtin" ? ["builtin"] : ["repo", "builtin"];
+    const selectedBuiltinPath = q.theme ? themedBuiltinIconPath : builtinIconPath;
     const icon = await resolveIconChain(iconOrder, {
       repoIconUrls,
       avatarUrl: data.avatarUrl,
-      builtinPath: builtinIconPath,
+      builtinPath: selectedBuiltinPath,
       imageFetcher,
       log,
     });
@@ -311,7 +313,7 @@ export function createApp(deps: ApiDeps) {
     // render cache key: template + data content version + icon source + resolved params
     const iconFingerprint = icon
       ? icon.kind === "builtin"
-        ? `builtin:${builtinFingerprint}`
+        ? `builtin:${builtinFingerprints.get(selectedBuiltinPath)}`
         : `${icon.kind}:${sha256hex(icon.buffer!.toString("base64")).slice(0, 16)}`
       : "none";
     const cacheKey = sha256hex(JSON.stringify({

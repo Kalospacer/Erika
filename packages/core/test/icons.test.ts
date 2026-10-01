@@ -1,5 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { REPO_ICON_PATHS, isRepoRelativePath, repoIconUrlsFor } from "../src/icons.js";
+import { REPO_ICON_PATHS, isRepoRelativePath, presetIconPaths, repoIconUrlsFor } from "../src/icons.js";
+
+describe("theme icon candidates", () => {
+  const preset = { icon: { path: "assets/original.webp", pathLight: "assets/light.webp", pathTransparent: "assets/transparent.png" } };
+
+  it("uses light, transparent and original assets in order, without changing auto", () => {
+    expect(presetIconPaths(preset, "light")).toEqual(["assets/light.webp", "assets/transparent.png", "assets/original.webp"]);
+    expect(presetIconPaths(preset, "dark")).toEqual(["assets/transparent.png", "assets/original.webp"]);
+    expect(presetIconPaths(preset)).toEqual(["assets/original.webp"]);
+  });
+
+  it("keeps ordered fallbacks and excludes filesystem paths from raw URLs", () => {
+    expect(repoIconUrlsFor({ owner: "A", repo: "b", explicit: ["C:/private.png", ...presetIconPaths(preset, "light")] }))
+      .toEqual(["light.webp", "transparent.png", "original.webp"].map((name) => `https://raw.githubusercontent.com/A/b/HEAD/assets/${name}`));
+  });
+});
 
 describe("isRepoRelativePath", () => {
   it("accepts paths inside the repository", () => {

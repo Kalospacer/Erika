@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mkdirSync, readFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { join, resolve } from "node:path";
@@ -80,5 +80,24 @@ describe("render-live", () => {
     await expect(
       renderLiveCommand({}, { templatesDir: DEFAULT_TEMPLATES_DIR, presetsPath: DEFAULT_PRESETS_PATH }),
     ).rejects.toThrow("--owner and --repo are required");
+  });
+
+  it("tries the light variant then the original repo icon when the variant is missing", async () => {
+    const dir = resolve("out/render-live-test");
+    mkdirSync(dir, { recursive: true });
+    const presetsPath = join(dir, "theme-presets.json");
+    writeFileSync(presetsPath, JSON.stringify({ "Some/One": { icon: { path: "assets/dark.png", pathLight: "assets/light.png" } } }));
+    const calls: string[] = [];
+    const fetchImpl = (async (url: string | URL | Request) => {
+      const value = String(url);
+      if (value.includes("api.github.com")) return gh200();
+      calls.push(value);
+      return new Response(value.endsWith("/light.png") ? null : TINY_PNG, { status: value.endsWith("/light.png") ? 404 : 200 });
+    }) as typeof fetch;
+    await renderLiveCommand(
+      { owner: "Some", repo: "One", theme: "light", out: join(dir, "light.webp") },
+      { templatesDir: DEFAULT_TEMPLATES_DIR, presetsPath }, { fetchImpl, avatarFetchImpl: fetchImpl },
+    );
+    expect(calls.map((url) => url.split("/").pop())).toEqual(["light.png", "dark.png"]);
   });
 });

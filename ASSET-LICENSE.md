@@ -10,9 +10,10 @@
 | --- | --- |
 | `packages/templates/assets/erika.webp` | Erika 默认插画（模板内置图标） |
 | `assets/erika-icon.webp` | Erika 仓库自身图标（Banner 左侧插画） |
+| `packages/templates/assets/erika-transparent.png`、`assets/erika-icon-transparent.png` | 原插画经 ImageGen 移除背景得到的透明衍生图，用于亮暗主题 |
 | `apps/playground/public/icon-192.png`、`icon-512.png`、`favicon.ico`、`favicon-32.png`、`apple-touch-icon.png` | 应用图标，由同一张透明底原图导出 |
 
-`tests/visual/baselines/erika-repo.png`、`erika-accent.png`、`stranger-repo.png` 是上述插画的排版衍生图，沿用原素材的权利范围。
+`tests/visual/baselines/erika-*.png`、`stranger-repo.png` 是上述插画的排版衍生图，沿用原素材的权利范围。
 `tests/visual/baselines/avatar-zh-light.png` 使用测试脚本绘制的头像图形，按项目 MIT 许可证提供。
 
 对于上述素材中 Moemu 实际持有且有权授权的权利，Moemu 按 [MIT](LICENSE) 授权。

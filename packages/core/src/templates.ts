@@ -10,6 +10,10 @@ export const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", 
 export const DEFAULT_TEMPLATES_DIR = join(REPO_ROOT, "packages", "templates");
 export const DEFAULT_PRESETS_PATH = join(REPO_ROOT, "apps", "api", "presets", "presets.json");
 
+export function builtinIconPathFor(templatesDir: string, theme?: string): string {
+  return join(templatesDir, "assets", theme ? "erika-transparent.png" : "erika.webp");
+}
+
 function readJson(path: string): unknown {
   return JSON.parse(readFileSync(path, "utf-8"));
 }

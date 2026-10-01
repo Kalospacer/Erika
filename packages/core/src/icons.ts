@@ -7,6 +7,15 @@
 import { existsSync, readFileSync } from "node:fs";
 import { loadImage } from "@napi-rs/canvas";
 import { LIMITS } from "@erika/shared";
+import type { Preset } from "./types.js";
+
+export function presetIconPaths(preset: Preset | null | undefined, theme?: string): string[] {
+  return [...new Set([
+    theme === "light" ? preset?.icon?.pathLight : undefined,
+    theme ? preset?.icon?.pathTransparent : undefined,
+    preset?.icon?.path,
+  ].filter((path): path is string => Boolean(path)))];
+}
 
 /** Decode and pixel-cap an image; throws on corrupt bytes or oversized input. */
 async function validateImage(buf: Buffer): Promise<Buffer> {
@@ -99,17 +108,18 @@ export function isRepoRelativePath(p: string): boolean {
   return !path.split(/[\\/]/u).includes("..");
 }
 
-/** Candidate raw URLs for the subject repo's icon: an explicit path wins,
- * otherwise the conventional locations are probed in order. An explicit path
- * that is not repo-relative is ignored (see isRepoRelativePath). */
+/** Explicit paths are tried in order (including theme-variant fallbacks).
+ * Without valid explicit paths, probe the conventional repository locations. */
 export function repoIconUrlsFor(s: {
   owner: string;
   repo: string;
   branch?: string;
-  explicit?: string;
+  explicit?: string | readonly string[];
 }): string[] {
   const base = `https://raw.githubusercontent.com/${s.owner}/${s.repo}/${s.branch ?? "HEAD"}`;
-  if (s.explicit && isRepoRelativePath(s.explicit)) return [`${base}/${s.explicit.trim()}`];
+  const paths = typeof s.explicit === "string" ? [s.explicit] : s.explicit ?? [];
+  const valid = [...new Set(paths.filter(isRepoRelativePath).map((path) => path.trim()))];
+  if (valid.length > 0) return valid.map((path) => `${base}/${path}`);
   return REPO_ICON_PATHS.map((p) => `${base}/${p}`);
 }
 
@@ -168,8 +178,8 @@ export function readBuiltinIcon(path: string): Buffer | null {
 // Sampling that corner region (rather than the whole border) is what makes the
 // shipped artworks work: their left edge carries the character, so a
 // border-wide sampler always fails on them (measured on the shipped sources).
-// Transparent or non-uniform corners -> null, and the icon falls back to the
-// card archetype with its guaranteed gap.
+// Transparent corners identify artwork that can composite onto a theme.
+// Non-uniform opaque corners use the contained card layout.
 
 import { createCanvas } from "@napi-rs/canvas";
 

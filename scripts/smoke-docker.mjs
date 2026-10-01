@@ -48,11 +48,21 @@ try {
   assert.equal(banner.headers.get("x-banner-icon"), "repo", "preset icon silently fell back");
   assert((await banner.arrayBuffer()).byteLength > 1000);
   assert.equal((await fetch(url, { headers: { "If-None-Match": banner.headers.get("etag") } })).status, 304);
+  const themeEtags = [];
+  for (const theme of ["light", "dark"]) {
+    const themed = await fetch(`${origin}/v1/banner/Moemu/Erika.png?theme=${theme}&icon=builtin`);
+    assert.equal(themed.status, 200);
+    assert.equal(themed.headers.get("content-type"), "image/png");
+    assert.equal(themed.headers.get("x-banner-icon"), "builtin", "transparent builtin missing from image");
+    assert((await themed.arrayBuffer()).byteLength > 1000);
+    themeEtags.push(themed.headers.get("etag"));
+  }
+  assert.notEqual(themeEtags[0], themeEtags[1], "theme renders share the same image");
   const missing = await fetch(`${origin}/v1/banner/Example/Missing.webp`);
   assert.equal(missing.status, 200);
   assert.equal(missing.headers.get("x-banner-error"), "not-found");
   assert.equal(missing.headers.get("content-type"), "image/webp");
-  console.log("Docker smoke passed: static assets, nested SPA, API 404, repo icon, ETag, placeholder.");
+  console.log("Docker smoke passed: static assets, nested SPA, API 404, repo icon, transparent themes, ETag, placeholder.");
 } catch (error) {
   if (started) console.error(docker("logs", name));
   throw error;

@@ -74,6 +74,9 @@ export interface IconBox {
 
 export interface IconSlot extends IconBox {
   sources: string[];
+  /** Explicit themes share this opaque-artwork inset; incompatible backdrops
+   * also receive rounded corners. Ratios of the active image box. */
+  frame?: { padding: number; radius: number };
 }
 
 /** Ratio layout in template data files (docs/design.md 5.3): every value is a
@@ -203,6 +206,8 @@ export interface Preset {
     /** optional light-theme variant for solid-background assets (design 10.0:
      * known solid-bg images may ship dark/light pairs) */
     pathLight?: string;
+    /** Transparent variant shared by explicitly selected themes. */
+    pathTransparent?: string;
   };
   theme?: string;
   /** per-theme color overrides: only the entry matching the resolved theme is
@@ -220,9 +225,8 @@ export interface RenderParams {
   /** explicit icon display overrides (query params); win over slot/preset */
   iconFit?: "contain" | "cover";
   iconRound?: boolean;
-  /** default true: with no explicit theme, capture the icon's background color
-   * and adopt it as the banner background (the PSD technique). false = use the
-   * theme background and lay the icon out contained with a guaranteed gap. */
+  /** Default true: inspect artwork for blend placement; auto mode also adopts
+   * its background. False keeps the theme background and the card layout. */
   bgCapture?: boolean;
 }
 

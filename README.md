@@ -52,13 +52,11 @@ Erika 是一个为 GitHub 仓库生成 Banner 的服务。她把项目插画、�
 ```html
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://erika.snowy.moe/v1/banner/Moemu/Erika.webp?theme=dark" />
-  <source media="(prefers-color-scheme: light)" srcset="https://erika.snowy.moe/v1/banner/Moemu/Erika.webp?theme=light" />
-  <img alt="项目 Banner" src="https://erika.snowy.moe/v1/banner/Moemu/Erika.webp" />
+  <img alt="项目 Banner" src="https://erika.snowy.moe/v1/banner/Moemu/Erika.webp?theme=light" />
 </picture>
 ```
 
-> **注意**：显式指定 `theme` 会关闭插画的背景融合，图标自带的底色会直接显示，与主题底色可能冲突、观感突兀。
-> 需要融合效果时请省略 `theme`（单 URL）。主题化与插画背景的兼容仍在计划中。
+透明插画直接融入主题背景。内置 Erika 插画会在显式主题下使用透明版；不透明插画的底色与主题不匹配时，显示为圆角插画区。省略 `theme` 时，继续使用原有的自动背景模式。
 
 </details>
 
@@ -84,6 +82,9 @@ assets/grokbot-icon.jpg
 | `?icon=avatar&iconFit=cover&iconRound=1` | 使用填满图标区域的圆形头像 |
 
 `iconPath` 接受仓库内的相对路径。多个参数用 `&` 连接。
+
+建议为亮暗主题共用的插画提供透明 PNG 或 WebP。服务会保留图片像素，不会自动抠图或改变人物颜色。
+自托管服务的项目预设可用 `icon.pathTransparent` 指定透明版，或用 `icon.pathLight` 指定亮色版；路径均属于目标仓库。亮色请求依次尝试亮色版、透明版和原图，暗色请求尝试透明版和原图。`iconPath` 始终覆盖预设选择。
 
 ### 排版模板
 

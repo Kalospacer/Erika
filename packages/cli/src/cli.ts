@@ -22,9 +22,10 @@ import {
   REPO_ROOT,
   loadPresetRegistry,
   loadTemplate,
+  builtinIconPathFor,
 } from "@erika/core";
 import { createGitHubProvider } from "@erika/providers";
-import { createImageFetcher, isRepoRelativePath, repoIconUrlsFor, resolveIconChain } from "@erika/core";
+import { createImageFetcher, isRepoRelativePath, presetIconPaths, repoIconUrlsFor, resolveIconChain } from "@erika/core";
 import type { BannerData, Preset, Template } from "@erika/core";
 
 type Deps = { templatesDir: string; presetsPath: string };
@@ -165,20 +166,21 @@ export async function renderLiveCommand(
   // same public interface as the API: the project icon lives in the subject
   // repo (or --icon pins a local file for offline runs)
   const iconBuffer = values.icon ? readFileSync(resolve(values.icon)) : null;
-  if (preset?.icon?.path && !isRepoRelativePath(preset.icon.path)) {
-    console.error(`[icons] preset icon path "${preset.icon.path}" is not repo-relative; probing the conventional paths instead`);
+  const repoIconPaths = presetIconPaths(preset, values.theme);
+  for (const path of repoIconPaths.filter((path) => !isRepoRelativePath(path))) {
+    console.error(`[icons] preset icon path "${path}" is not repo-relative; ignoring it`);
   }
   const repoIconUrls = repoIconUrlsFor({
     owner: values.owner,
     repo: values.repo,
     branch: data.defaultBranch,
-    explicit: preset?.icon?.path,
+    explicit: repoIconPaths,
   });
   const icon = iconBuffer
     ? { kind: "repo" as const, buffer: iconBuffer }
     : await resolveIconChain(["repo", "builtin"], {
         repoIconUrls,
-        builtinPath: join(deps.templatesDir, "assets", "erika.webp"),
+        builtinPath: builtinIconPathFor(deps.templatesDir, values.theme),
         imageFetcher: createImageFetcher({ fetchImpl: options.avatarFetchImpl }),
         log: (msg) => console.error(`[icons] ${msg}`),
       });

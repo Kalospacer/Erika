@@ -45,6 +45,10 @@ const cases = [
     params: {},
   },
   { id: "stranger-repo", template: "grokbot", repo: "Some/Random-Repository", data: stranger, asset: "erika.webp", kind: "repo", params: {} },
+  ...["light", "dark"].flatMap((theme) => [
+    { id: `erika-transparent-${theme}`, template: "grokbot", repo: "Moemu/Erika", data: erika, asset: "erika-transparent.png", kind: "repo", params: { theme } },
+    { id: `erika-opaque-${theme}`, template: "grokbot", repo: "Moemu/Erika", data: erika, asset: "erika.webp", kind: "repo", params: { theme } },
+  ]),
   { id: "avatar-zh-light", template: "avatar", data: { fullName: "Example/Project", name: "中文项目与长标题排版", description: "这是固定的中文描述，用来检查字体回退、换行和图文间距。\nA fixed bilingual description for visual regression." }, kind: "avatar", params: { theme: "light" } },
 ];
 mkdirSync(update ? baselines : output, { recursive: true });

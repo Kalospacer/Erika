@@ -43,8 +43,7 @@ export function Snippets({ state, path }: { state: ParamState; path: string }) {
       </div>
       {tab === "html" && (
         <p className="text-xs text-ink-600">
-          暗色 source + 亮色回退：GitHub 亮/暗主题各取所需。注意：显式指定 theme 会关闭插画背景融合，
-          图标自带底色直接显示，可能与主题底色冲突——需要融合效果时请用「URL」标签里的单图。
+          GitHub 会按亮暗主题选择图片。透明插画直接融合；不透明插画底色与主题不匹配时，使用圆角插画区。
         </p>
       )}
     </div>

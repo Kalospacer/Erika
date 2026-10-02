@@ -42,6 +42,8 @@
 - [数据未变时再次运行](https://github.com/Moemu/erika-acceptance/actions/runs/36953593721) 成功，仓库 HEAD 仍为 `cf2adde`，没有新增图片提交。
 - 定时入口设为每小时第 17 分钟。实际 `schedule` 事件另行观察，手动运行成功不等于定时触发已验收。
 
+截至 2026-10-02 08:51 UTC，独立仓库仍没有实际 `schedule` 事件。默认分支、工作流状态和 Actions 配置已核对，未发现配置错误，未触发原因仍未知。04:53 UTC 对现有工作流做一次定时配置变更，诊断窗口于 08:47 UTC 结束，未取得事件证据。08:54 UTC 已通过 [提交 18da831](https://github.com/Moemu/erika-acceptance/commit/18da831af33eec61d3d8f83e8d209a8afbe6a87c) 恢复每小时第 17 分钟的计划，并读回复核。后续每 4 小时检查实际事件。定时验收仍未通过；配置恢复不作为通过证据。
+
 ## Vercel 与 Camo
 
 生产部署的 MAS 请求 `nh92n-1790905131847-36be52f1d446` 在平台日志中标记为 `Start Type: Hot`。执行时间 842 毫秒，峰值内存 246 MB，平台响应时间约 1.6 秒。此请求不作为冷启动证据。

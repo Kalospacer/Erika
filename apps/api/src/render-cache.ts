@@ -13,6 +13,7 @@ export function sha256hex(input: string): string {
 interface Entry {
   bytes: Buffer;
   etag: string;
+  accent?: string;
 }
 
 export class RenderCache {
@@ -30,17 +31,17 @@ export class RenderCache {
     return entry;
   }
 
-  set(key: string, bytes: Buffer): Entry {
+  set(key: string, bytes: Buffer, accent?: string): Entry {
     if (bytes.length > this.maxBytes) {
       // single image larger than the whole cache: return etag without storing
-      return { bytes, etag: etagOf(bytes) };
+      return { bytes, etag: etagOf(bytes), accent };
     }
     const prev = this.map.get(key);
     if (prev) {
       this.totalBytes -= prev.bytes.length;
       this.map.delete(key);
     }
-    const entry = { bytes, etag: etagOf(bytes) };
+    const entry = { bytes, etag: etagOf(bytes), accent };
     this.map.set(key, entry);
     this.totalBytes += bytes.length;
     while (this.totalBytes > this.maxBytes) {

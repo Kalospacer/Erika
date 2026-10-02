@@ -41,8 +41,11 @@ export type ImageFormat = (typeof FORMATS)[number];
 export const ICON_SOURCES = ["auto", "avatar", "builtin"] as const;
 export type IconSource = (typeof ICON_SOURCES)[number];
 
+export const accentSchema = z.string().regex(/^(auto|#[0-9a-fA-F]{6})$/, "use auto or #RRGGBB");
+
 export const bannerQuerySchema = z.object({
   theme: z.string().max(32).optional(),
+  accent: accentSchema.optional(),
   title: z.string().max(LIMITS.titleChars).optional(),
   description: z.string().max(LIMITS.descriptionChars).optional(),
   /** csv of metadata fields, e.g. "stars,release"; empty = show none */
@@ -69,6 +72,7 @@ export type BannerQuery = z.infer<typeof bannerQuerySchema>;
 
 export interface NormalizedQuery {
   theme: string;
+  accent?: string;
   scale: number;
   lang: "en" | "zh";
   title?: string;
@@ -85,6 +89,7 @@ export interface NormalizedQuery {
 export function normalizeQuery(q: BannerQuery): NormalizedQuery {
   return {
     theme: q.theme ?? "",
+    accent: q.accent === "auto" ? "auto" : q.accent?.toUpperCase(),
     scale: q.scale ?? 0.5,
     lang: q.lang ?? "en",
     title: q.title,

@@ -115,6 +115,24 @@ export function ParamPanel({
             </Field>
           </div>
 
+          <Field label={t("accent")} hint={t("accentHint")}>
+            <div className="flex items-center gap-2">
+              <Select
+                value={state.accent === "auto" ? "auto" : state.accent ? "custom" : ""}
+                onChange={(e) => patch({ accent: e.target.value === "custom" ? "#8B65B5" : e.target.value || null })}
+                options={[
+                  { value: "", label: t("presetDefault") },
+                  { value: "auto", label: t("accentAuto") },
+                  { value: "custom", label: t("accentCustom") },
+                ]}
+              />
+              {state.accent && state.accent !== "auto" && (
+                <input type="color" aria-label={t("accentCustom")} value={/^#[0-9a-f]{6}$/i.test(state.accent) ? state.accent : "#8B65B5"}
+                  onInput={(e) => patch({ accent: e.currentTarget.value })} className="h-8 w-12 shrink-0 cursor-pointer" />
+              )}
+            </div>
+          </Field>
+
           <Field label={t("titleOverride")} hint={t("titleHint", { limit: limits?.title ?? 25 })}>
             <TextInput
               value={state.title}

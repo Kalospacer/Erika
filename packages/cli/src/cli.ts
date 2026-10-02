@@ -40,6 +40,7 @@ async function main(): Promise<number> {
       owner: { type: "string" },
       repo: { type: "string" },
       theme: { type: "string" },
+      accent: { type: "string" },
       scale: { type: "string" },
       title: { type: "string" },
       description: { type: "string" },
@@ -85,7 +86,7 @@ function loadPreset(values: { preset?: string; "presets-path"?: string }): Prese
 
 async function renderCommand(
   values: {
-    template?: string; data?: string; theme?: string; scale?: string; title?: string;
+    template?: string; data?: string; theme?: string; accent?: string; scale?: string; title?: string;
     description?: string; meta?: string; icon?: string; out?: string; font?: string;
     "fonts-dir"?: string[]; format?: string; "templates-dir"?: string; preset?: string;
     "presets-path"?: string;
@@ -112,6 +113,7 @@ async function renderCommand(
     preset,
     params: {
       theme: values.theme,
+      accent: values.accent,
       scale: values.scale ? Number(values.scale) : undefined,
       title: values.title,
       description: values.description,
@@ -129,7 +131,7 @@ async function renderCommand(
 
   console.log(
     `rendered ${out}  ${result.width}x${result.height}  ${result.buffer.length} bytes  ` +
-      `template=${template.id} font=${result.fontUsed} theme=${values.theme ?? preset?.theme ?? template.defaults.theme}`,
+      `template=${template.id} font=${result.fontUsed} theme=${values.theme ?? preset?.theme ?? template.defaults.theme} accent=${result.accent}`,
   );
   return 0;
 }
@@ -139,7 +141,7 @@ async function renderCommand(
  * workflow regenerates committed banner files without any hosted service. */
 export async function renderLiveCommand(
   values: {
-    owner?: string; repo?: string; template?: string; theme?: string; scale?: string;
+    owner?: string; repo?: string; template?: string; theme?: string; accent?: string; scale?: string;
     title?: string; description?: string; meta?: string; icon?: string; out?: string; font?: string;
     "fonts-dir"?: string[]; format?: string; "presets-path"?: string; token?: string;
     "templates-dir"?: string;
@@ -193,6 +195,7 @@ export async function renderLiveCommand(
     preset,
     params: {
       theme: values.theme,
+      accent: values.accent,
       scale: values.scale ? Number(values.scale) : undefined,
       title: values.title,
       description: values.description,
@@ -210,7 +213,7 @@ export async function renderLiveCommand(
 
   console.log(
     `render-live ${out}  ${result.width}x${result.height}  ${result.buffer.length} bytes  ` +
-      `stars=${data.stargazersCount ?? "?"} freshness=${snapshot.freshness} font=${result.fontUsed}`,
+      `stars=${data.stargazersCount ?? "?"} freshness=${snapshot.freshness} font=${result.fontUsed} accent=${result.accent}`,
   );
   return 0;
 }

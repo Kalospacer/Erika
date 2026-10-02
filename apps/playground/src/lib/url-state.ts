@@ -5,7 +5,7 @@ import type { ParamState } from "./api.js";
 import type { Locale } from "./locale.js";
 
 const KEYS = [
-  "owner", "repo", "template", "theme", "title", "description",
+  "owner", "repo", "template", "theme", "accent", "title", "description",
   "scale", "icon", "iconPath", "iconFit", "iconRound", "meta", "lang", "scheme", "apiBase",
 ] as const;
 
@@ -37,6 +37,7 @@ export function writeStateToUrl(state: ParamState, locale: Locale): void {
   if (state.repo) params.set("repo", state.repo);
   if (state.template) params.set("template", state.template);
   if (state.theme) params.set("theme", state.theme);
+  if (state.accent) params.set("accent", state.accent);
   if (state.title) params.set("title", state.title);
   if (state.description) params.set("description", state.description);
   if (state.scale != null) params.set("scale", String(state.scale));

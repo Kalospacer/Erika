@@ -73,6 +73,47 @@ describe("GET /v1/banner", () => {
     app = buildApp(queue);
   });
 
+  it("validates accent colors before fetching upstream", async () => {
+    for (const accent of ["red", "#fff", "#GG0000", "auto!"]) {
+      const res = await app.request(`/v1/banner/A/B.webp?accent=${encodeURIComponent(accent)}`);
+      expect(res.status).toBe(400);
+    }
+    expect(queue).toHaveLength(0);
+  });
+
+  it("keeps accent colors distinct in cache and exposes them on cache hits and 304", async () => {
+    const url = "/v1/banner/Moemu/Erika.webp?scale=0.1&theme=light";
+    const fetch = async (accent?: string, etag?: string) => {
+      queue.push(snapshot(42));
+      return app.request(url + (accent ? `&accent=${encodeURIComponent(accent)}` : ""),
+        etag ? { headers: { "If-None-Match": etag } } : undefined);
+    };
+    const defaults = await fetch();
+    const custom = await fetch("#FFFFFF");
+    expect(custom.headers.get("X-Banner-Accent")).toBe("#FFFFFF");
+    expect(custom.headers.get("etag")).not.toBe(defaults.headers.get("etag"));
+    const cached = await fetch("#ffffff", custom.headers.get("etag")!);
+    expect(cached.status).toBe(304);
+    expect(cached.headers.get("X-Banner-Accent")).toBe("#FFFFFF");
+    const auto = await fetch("auto");
+    expect(auto.headers.get("X-Banner-Accent")).toMatch(/^#[0-9A-F]{6}$/);
+    expect(auto.headers.get("access-control-expose-headers")).toContain("X-Banner-Accent");
+  });
+
+  it("uses requested accent on placeholders and separates their cache entries", async () => {
+    const request = async (accent: string) => {
+      queue.push(new NotFoundError("missing"));
+      return app.request(`/v1/banner/No/Such.webp?scale=0.1&accent=${encodeURIComponent(accent)}`);
+    };
+    const first = await request("#123456");
+    const second = await request("#654321");
+    const cached = await request("#123456");
+    expect(first.headers.get("X-Banner-Accent")).toBe("#123456");
+    expect(second.headers.get("etag")).not.toBe(first.headers.get("etag"));
+    expect(cached.headers.get("X-Banner-Accent")).toBe("#123456");
+    expect(cached.headers.get("etag")).toBe(first.headers.get("etag"));
+  });
+
   it("renders a webp with ETag + cache headers", async () => {
     queue.push(snapshot(9));
     const res = await app.request("/v1/banner/Moemu/Erika.webp");

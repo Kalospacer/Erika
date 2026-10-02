@@ -15,6 +15,7 @@ const DEFAULT_STATE = {
   repo: "Erika",
   template: null,
   theme: null,
+  accent: null,
   title: "",
   description: "",
   scale: null,

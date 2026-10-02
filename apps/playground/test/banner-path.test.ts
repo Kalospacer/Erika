@@ -6,6 +6,7 @@ const base: ParamState = {
   repo: "Erika",
   template: null,
   theme: null,
+  accent: null,
   title: "",
   description: "",
   scale: null,
@@ -40,6 +41,11 @@ describe("bannerPath", () => {
     expect(p).toBe(
       "/v1/banner/Moemu/Erika/grokbot.webp?scale=0.75&icon=avatar&iconPath=assets%2Fmine.webp&meta=",
     );
+  });
+
+  it("exports automatic and custom accents with safe URL encoding", () => {
+    expect(bannerPath({ ...base, accent: "auto" })).toBe("/v1/banner/Moemu/Erika.webp?accent=auto");
+    expect(bannerPath({ ...base, accent: "#8B65B5" })).toBe("/v1/banner/Moemu/Erika.webp?accent=%238B65B5");
   });
 
   it("returns null for incomplete repo coordinates", () => {

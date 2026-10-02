@@ -46,6 +46,7 @@ export interface PreviewImage {
   iconKind: string | null;
   presetUsed: boolean;
   template: string | null;
+  accent: string | null;
 }
 
 /** Fetch the banner as a blob so X-Banner-Error is readable (plain <img> can't). */
@@ -74,6 +75,7 @@ export async function fetchBanner(
     iconKind: res.headers.get("X-Banner-Icon"),
     presetUsed: res.headers.get("X-Banner-Preset") === "1",
     template: res.headers.get("X-Banner-Template"),
+    accent: res.headers.get("X-Banner-Accent"),
   };
 }
 
@@ -81,6 +83,7 @@ export type ParamState = {
   owner: string;
   repo: string;
   template: string | null; // null = preset default / classic
+  accent: string | null;
   theme: string | null; // null = preset default
   title: string;
   description: string;
@@ -104,6 +107,7 @@ export function bannerPath(state: ParamState): string | null {
   if (!owner.trim() || !repo.trim()) return null;
   const params = new URLSearchParams();
   if (state.theme) params.set("theme", state.theme);
+  if (state.accent) params.set("accent", state.accent);
   if (state.title) params.set("title", state.title);
   if (state.description) params.set("description", state.description);
   if (state.scale != null) params.set("scale", String(state.scale));

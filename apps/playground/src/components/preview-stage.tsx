@@ -95,6 +95,11 @@ export function PreviewStage({
               : t("noPreset")}
           </span>
         )}
+        {image?.accent && (
+          <span className="inline-flex items-center gap-1.5">
+            {t("accent")}: <i className="h-3 w-3 rounded-sm border border-ink-500" style={{ background: image.accent }} />{image.accent}
+          </span>
+        )}
         {image?.bannerError && (
           <span className="rounded-full bg-brand-500/12 px-2 py-0.5 text-brand-600 ring-1 ring-brand-500/30">
             {t("placeholder")}: {bannerErrorLabel(image.bannerError, t)}

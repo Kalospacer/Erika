@@ -136,6 +136,7 @@ Grokbot 和 Avatar 模板还支持 `license`、`language`、`last_updated`，可
 | 参数 | 说明 |
 | --- | --- |
 | `theme` | `light` / `dark`；省略时根据插画背景自动配色；显式主题决定底色与文字配色，插画按透明度与背景兼容性融合或使用圆角兜底 |
+| `accent` | `auto` 从插画取色并调整明度；`#RRGGBB` 指定颜色且保持原值（URL 中 `#` 写作 `%23`）；省略时沿用预设或模板强调色 |
 | `icon` | `auto` / `avatar` / `builtin`，默认 `auto` |
 | `iconPath` | 仓库内的图片相对路径，最长 128 个字符 |
 | `iconFit` | `contain` 保留完整图片，`cover` 填满区域并裁切 |
@@ -146,6 +147,9 @@ Grokbot 和 Avatar 模板还支持 `license`、`language`、`last_updated`，可
 | `scale` | 缩放比例，范围为 0.1～1；默认 0.5，输出 1500 × 900 图片 |
 | `lang` | 错误占位图语言，`en` / `zh`，默认 `en` |
 | `fresh` | `fresh=1` 使用 `Cache-Control: no-cache`，让图片代理验证源站；GitHub 数据仍受 Provider 缓存有效期影响 |
+
+自动取色会忽略透明像素、识别到的背景色和黑白灰，并按色相、面积与饱和度选色，再调整明度。没有合适颜色时回退到预设或模板强调色。响应头 `X-Banner-Accent` 返回最终色值。CLI 的 `render` 和 `render-live` 同样支持 `--accent auto` 或 `--accent "#8B65B5"`。
+
 
 ## 部署📦
 

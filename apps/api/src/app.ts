@@ -105,7 +105,7 @@ export function createApp(deps: ApiDeps) {
   const imageFetcher = deps.imageFetcher ?? createImageFetcher({ log });
   const cache = new RenderCache(deps.cacheMaxBytes ?? LIMITS.renderCacheMB * 1024 * 1024);
   const renderQueue = new RenderQueue(deps.renderConcurrency ?? 4, deps.renderQueueMax ?? 64);
-  const inflight = new SingleFlight<{ bytes: Buffer; contentType: string }>();
+  const inflight = new SingleFlight<{ bytes: Buffer; contentType: string; accent?: string }>();
 
   const app = new Hono();
 
@@ -113,7 +113,7 @@ export function createApp(deps: ApiDeps) {
   app.use("*", async (c, next) => {
     await next();
     c.header("Access-Control-Allow-Origin", "*");
-    c.header("Access-Control-Expose-Headers", "ETag, X-Banner-Error, X-Banner-Icon, X-Banner-Preset, X-Banner-Template");
+    c.header("Access-Control-Expose-Headers", "ETag, X-Banner-Error, X-Banner-Icon, X-Banner-Preset, X-Banner-Template, X-Banner-Accent");
   });
 
   app.get("/healthz", (c) =>
@@ -245,13 +245,13 @@ export function createApp(deps: ApiDeps) {
     // ---- placeholder path (never a broken image) ----
     if (errorKind) {
       const placeholderIcon = errorKind === "not-found" ? notFoundIcon : undefined;
-      const phKey = `ph:${errorKind}:${lang}:${q.scale}:${repoKey}:${template.id}:${template.version}:${q.theme ?? ""}:${format}:${placeholderIcon ? notFoundFingerprint : ""}`;
-      let ph: { bytes: Buffer; contentType: string };
+      const phKey = `ph:${errorKind}:${lang}:${q.scale}:${repoKey}:${template.id}:${template.version}:${q.theme ?? ""}:${format}:${placeholderIcon ? notFoundFingerprint : ""}:${q.accent ?? ""}`;
+      let ph: { bytes: Buffer; contentType: string; accent?: string };
       try {
         ph = await renderQueue.run(() =>
           inflight.run(phKey, async () => {
             const cached = cache.get(phKey);
-            if (cached) return { bytes: cached.bytes, contentType: `image/${format}` };
+            if (cached) return { bytes: cached.bytes, contentType: `image/${format}`, accent: cached.accent };
             const msg = PLACEHOLDER_MESSAGES[errorKind!][lang];
             const res = await renderBanner({
               template,
@@ -261,13 +261,13 @@ export function createApp(deps: ApiDeps) {
                 description: msg,
                 theme: q.theme,
               },
-              params: { scale: q.scale, theme: q.theme, meta: [] },
+              params: { scale: q.scale, theme: q.theme, accent: q.accent, meta: [] },
               fontDirs: [fontsDir],
               iconOverride: placeholderIcon ? { buffer: placeholderIcon, kind: "builtin" } : undefined,
               format,
             });
-            const stored = cache.set(phKey, res.buffer);
-            return { bytes: stored.bytes, contentType: `image/${format}` };
+            const stored = cache.set(phKey, res.buffer, res.accent);
+            return { bytes: stored.bytes, contentType: `image/${format}`, accent: stored.accent };
           }),
         );
       } catch (err) {
@@ -275,6 +275,7 @@ export function createApp(deps: ApiDeps) {
         throw err;
       }
       const etag = etagOf(ph.bytes);
+      if (ph.accent) c.header("X-Banner-Accent", ph.accent);
       c.header("X-Banner-Error", errorKind);
       c.header("X-Banner-Icon", placeholderIcon ? "builtin" : "none");
       c.header("X-Banner-Template", template.id);
@@ -335,6 +336,7 @@ export function createApp(deps: ApiDeps) {
       title,
       description,
       theme: q.theme ?? null,
+      accent: q.accent ?? null,
       scale: q.scale,
       iconFit: q.iconFit ?? null,
       iconRound: q.iconRound ?? null,
@@ -342,18 +344,19 @@ export function createApp(deps: ApiDeps) {
       format,
     }));
 
-    let rendered: { bytes: Buffer; contentType: string };
+    let rendered: { bytes: Buffer; contentType: string; accent?: string };
     try {
       rendered = await renderQueue.run(() =>
         inflight.run(cacheKey, async () => {
           const cached = cache.get(cacheKey);
-          if (cached) return { bytes: cached.bytes, contentType: `image/${format}` };
+          if (cached) return { bytes: cached.bytes, contentType: `image/${format}`, accent: cached.accent };
           const res = await renderBanner({
             template,
             data,
             preset: preset ?? null,
             params: {
               theme: q.theme,
+              accent: q.accent,
               scale: q.scale,
               title: q.title,
               description: q.description,
@@ -365,8 +368,8 @@ export function createApp(deps: ApiDeps) {
             fontDirs: [fontsDir],
             format,
           });
-          const stored = cache.set(cacheKey, res.buffer);
-          return { bytes: stored.bytes, contentType: `image/${format}` };
+          const stored = cache.set(cacheKey, res.buffer, res.accent);
+          return { bytes: stored.bytes, contentType: `image/${format}`, accent: stored.accent };
         }),
       );
     } catch (err) {
@@ -381,6 +384,7 @@ export function createApp(deps: ApiDeps) {
     c.header("X-Banner-Template", template.id);
     c.header("X-Banner-Icon", icon?.kind ?? "none");
     c.header("X-Banner-Preset", preset ? "1" : "0");
+    if (rendered.accent) c.header("X-Banner-Accent", rendered.accent);
     if (c.req.header("If-None-Match") === etag) return c.body(null, 304);
     return c.body(new Uint8Array(rendered.bytes), 200, { "Content-Type": rendered.contentType });
   }
@@ -398,7 +402,7 @@ code{background:#2a2523;padding:2px 6px;border-radius:4px}a{color:#d9a08a}</styl
 <pre><code>GET /v1/banner/:owner/:repo.webp
 GET /v1/banner/:owner/:repo/:template.webp</code></pre>
 <p>示例：<a href="/v1/banner/Moemu/Erika.webp">/v1/banner/Moemu/Erika.webp</a></p>
-<p>参数：theme / title / description / meta / icon / scale / lang / fresh（见 <a href="/v1/meta">/v1/meta</a> 与 <a href="/doc">/doc</a>）</p>
+<p>参数：theme / accent / title / description / meta / icon / scale / lang / fresh（见 <a href="/v1/meta">/v1/meta</a> 与 <a href="/doc">/doc</a>）</p>
 </body></html>`);
     });
   }
@@ -417,6 +421,7 @@ GET /v1/banner/:owner/:repo/:template.webp</code></pre>
               { name: "repo", in: "path", required: true, schema: { type: "string" } },
               { name: "format", in: "path", required: true, schema: { enum: [".webp", ".png"] } },
               { name: "theme", in: "query", schema: { type: "string" } },
+              { name: "accent", in: "query", schema: { type: "string", pattern: "^(auto|#[0-9a-fA-F]{6})$", example: "auto" } },
               { name: "title", in: "query", schema: { type: "string", maxLength: LIMITS.titleChars } },
               { name: "description", in: "query", schema: { type: "string", maxLength: LIMITS.descriptionChars } },
               { name: "meta", in: "query", description: `Comma-separated fields: ${META_FIELDS.join(", ")}. Empty string hides all metadata. Omit to use template defaults. last_updated is the UTC code push date.`, schema: { type: "string", example: "license,language,last_updated" } },

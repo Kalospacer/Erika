@@ -32,7 +32,8 @@ import type {
   ThemeColors,
   TitleSlot,
 } from "./types.js";
-import type { MetaField } from "@erika/shared";
+import { accentSchema, type MetaField } from "@erika/shared";
+import { detectAccentColor } from "./accent.js";
 
 type Ctx = ReturnType<ReturnType<typeof createCanvas>["getContext"]>;
 
@@ -474,6 +475,7 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
 
   // An explicit theme fixes the palette, while artwork inspection determines
   // placement independently. Auto mode may also adopt the artwork backdrop.
+  const accent = params.accent === undefined ? undefined : accentSchema.parse(params.accent);
   const explicitThemeName = params.theme || null; // only a non-empty query theme is explicit
   if (explicitThemeName !== null && !template.themes[explicitThemeName]) {
     throw new Error(`unknown theme "${explicitThemeName}"; available: ${Object.keys(template.themes).join(", ")}`);
@@ -516,6 +518,12 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
     ...(preset?.themeOverrides?.[paletteName] ?? {}),
     background,
   };
+
+  if (accent === "auto" && iconImg) {
+    colors.accent = detectAccentColor(iconImg, background, captured?.color ?? null) ?? colors.accent;
+  } else if (accent && accent !== "auto") {
+    colors.accent = accent.toUpperCase();
+  }
 
   // Small encoding differences are compatible; unlike auto mode, explicit
   // themes never replace their background with the sampled colour.
@@ -753,7 +761,7 @@ export async function renderBanner(input: RenderInput): Promise<RenderResult> {
   const buffer =
     format === "png" ? await canvas.encode("png") : await canvas.encode("webp", webpQuality);
 
-  return { buffer, width, height, format, fontUsed: family };
+  return { buffer, width, height, format, fontUsed: family, accent: colors.accent };
 }
 
 export { buildTitleRuns, fitTitle, wrapDescription } from "./layout.js";

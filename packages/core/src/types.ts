@@ -222,6 +222,8 @@ export interface Preset {
 }
 
 export interface RenderParams {
+  /** Explicit #RRGGBB or opt-in artwork detection (auto). */
+  accent?: string;
   theme?: string;
   scale?: number;
   title?: string;
@@ -242,4 +244,5 @@ export interface RenderResult {
   height: number;
   format: "png" | "webp";
   fontUsed: string;
+  accent: string;
 }

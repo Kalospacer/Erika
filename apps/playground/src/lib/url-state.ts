@@ -2,6 +2,7 @@
  * panel configuration is shareable by link (design doc section 8). */
 
 import type { ParamState } from "./api.js";
+import type { Locale } from "./locale.js";
 
 const KEYS = [
   "owner", "repo", "template", "theme", "title", "description",
@@ -29,8 +30,9 @@ export function readStateFromUrl(): Partial<ParamState> {
   return state;
 }
 
-export function writeStateToUrl(state: ParamState): void {
+export function writeStateToUrl(state: ParamState, locale: Locale): void {
   const params = new URLSearchParams();
+  params.set("uiLang", locale);
   if (state.owner) params.set("owner", state.owner);
   if (state.repo) params.set("repo", state.repo);
   if (state.template) params.set("template", state.template);

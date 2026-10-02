@@ -38,6 +38,8 @@ Erika 是一个为 GitHub 仓库生成 Banner 的服务。她把项目插画、�
 
 打开 [Playground](https://erika.snowy.moe/)，填写仓库的 Owner 和 Repo，调整图标、文字及主题，然后复制页面生成的 Markdown。
 
+Playground 支持简体中文和英文，可在页面顶部切换。界面语言按分享链接中的 `uiLang`、已保存的选择、浏览器语言依次确定；其他语言默认使用英文。语言选择会保存在浏览器和分享链接中，例如 `?uiLang=en`。切换界面语言保留当前配置，仓库名称和描述保持原文；占位图默认跟随界面，也可在高级选项中单独指定语言。
+
 也可以直接把下面的内容放进 README，将 `Moemu/Erika` 替换为你的公开仓库：
 
 ```markdown

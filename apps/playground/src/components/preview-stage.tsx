@@ -1,13 +1,14 @@
 /** Preview stage: GitHub README simulation (light/dark, ~830px content width).
  * The image is the REAL API response -- preview is production. */
 
+import { useI18n, type Translate } from "../lib/i18n.js";
 import { cn } from "./ui.js";
 import { FileText } from "lucide-react";
 import type { PreviewImage } from "../lib/api.js";
 
 const GH_SCHEME = {
-  light: { bg: "#ffffff", border: "#d1d9e0", label: "GitHub 亮色" },
-  dark: { bg: "#0d1117", border: "#3d444d", label: "GitHub 暗色" },
+  light: { bg: "#ffffff", border: "#d1d9e0" },
+  dark: { bg: "#0d1117", border: "#3d444d" },
 } as const;
 
 export function PreviewStage({
@@ -27,6 +28,7 @@ export function PreviewStage({
   scale: number;
   canvas: { width: number; height: number } | null;
 }) {
+  const { t } = useI18n();
   const gh = GH_SCHEME[scheme];
   return (
     <div className="space-y-2">
@@ -58,7 +60,7 @@ export function PreviewStage({
           {image ? (
             <img
               src={image.blobUrl}
-              alt="仓库 Banner 预览"
+              alt={t("bannerAlt")}
               className={cn(
                 "h-auto w-full rounded-lg transition-opacity duration-300",
                 loading ? "opacity-40" : "opacity-100",
@@ -70,63 +72,63 @@ export function PreviewStage({
               className="flex h-40 items-center justify-center text-sm"
               style={{ color: scheme === "dark" ? "#e6edf3" : "#1f2328" }}
             >
-              {loading ? "正在加载…" : "输入 owner / repo 生成预览"}
+              {loading ? t("loading") : t("enterRepo")}
             </div>
           )}
         </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-1 text-xs text-ink-300">
-        <span>{gh.label} · README 内容宽 ≈ 830px</span>
+        <span>GitHub {t(scheme)} · {t("readmeWidth")}</span>
         {image && canvas && (
           <span>
-            输出 {Math.round(canvas.width * scale)}×{Math.round(canvas.height * scale)} ·{" "}
+            {t("output")} {Math.round(canvas.width * scale)}×{Math.round(canvas.height * scale)} ·{" "}
             {(image.sizeBytes / 1024).toFixed(0)} KB
           </span>
         )}
         {image && (
           <span>
-            图标：{iconKindLabel(image.iconKind ?? "none")}
-            {image.template ? ` · 模板：${image.template}` : ""} · 预设：
+            {t("icon")}: {iconKindLabel(image.iconKind ?? "none", t)}
+            {image.template ? ` · ${t("template")}: ${image.template}` : ""} · {t("preset")}:{" "}
             {image.presetUsed
-              ? "已应用"
-              : "未使用（可在 presets.json 添加）"}
+              ? t("applied")
+              : t("noPreset")}
           </span>
         )}
         {image?.bannerError && (
           <span className="rounded-full bg-brand-500/12 px-2 py-0.5 text-brand-600 ring-1 ring-brand-500/30">
-            占位图：{bannerErrorLabel(image.bannerError)}
+            {t("placeholder")}: {bannerErrorLabel(image.bannerError, t)}
           </span>
         )}
-        {error && <span className="text-red-600">加载失败：{error}</span>}
+        {error && <span className="text-red-600">{t("loadFailed")}: {error}</span>}
       </div>
     </div>
   );
 }
 
-function iconKindLabel(kind: string): string {
+function iconKindLabel(kind: string, t: Translate): string {
   switch (kind) {
     case "repo":
-      return "项目仓库图标";
+      return t("repoIcon");
     case "avatar":
-      return "GitHub 头像";
+      return t("avatar");
     case "builtin":
-      return "内置默认图标";
+      return t("builtinIcon");
     case "none":
-      return "无";
+      return t("none");
     default:
       return kind;
   }
 }
 
-function bannerErrorLabel(kind: string): string {
+function bannerErrorLabel(kind: string, t: Translate): string {
   switch (kind) {
     case "not-found":
-      return "仓库不存在或已私有";
+      return t("notFound");
     case "upstream-rate-limited":
-      return "GitHub 配额受限";
+      return t("rateLimited");
     case "upstream-timeout":
-      return "上游暂时不可用";
+      return t("timeout");
     default:
       return kind;
   }

@@ -1,6 +1,7 @@
 /** shadcn-style local components (no Radix dependency for v1): the handful of
  * primitives the playground needs, styled with Tailwind v4 tokens. */
 
+import { useI18n } from "../lib/i18n.js";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { useState, type ReactNode } from "react";
@@ -82,7 +83,7 @@ export function Field({
 }) {
   return (
     <label className="block space-y-1">
-      <span className="flex items-baseline justify-between text-xs text-ink-300">
+      <span className="flex flex-wrap items-baseline justify-between gap-x-2 text-xs text-ink-300">
         <span>{label}</span>
         {hint && <span className="text-ink-600">{hint}</span>}
       </span>
@@ -93,29 +94,34 @@ export function Field({
 
 export function CopyButton({
   text,
-  label = "复制",
+  label,
   className,
 }: {
   text: string;
   label?: string;
   className?: string;
 }) {
+  const { t } = useI18n();
+  const [failed, setFailed] = useState(false);
   const [copied, setCopied] = useState(false);
+  const feedback = copied ? t("copied") : failed ? t("copyFailed") : label ?? t("copy");
   return (
     <Button
+      aria-label={feedback}
       onClick={async () => {
         try {
+          setFailed(false);
           await navigator.clipboard.writeText(text);
           setCopied(true);
           setTimeout(() => setCopied(false), 1200);
         } catch {
-          // clipboard unavailable (http); best effort only
+          setFailed(true);
         }
       }}
       className={cn(className, copied && "text-emerald-300")}
     >
       {copied ? <Check size={14} /> : <Copy size={14} />}
-      {copied ? "已复制" : label}
+      <span role="status">{feedback}</span>
     </Button>
   );
 }

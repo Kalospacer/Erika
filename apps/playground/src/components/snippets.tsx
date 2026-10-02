@@ -1,11 +1,13 @@
 /** Snippet export: Markdown / dual-theme <picture> / plain URL, built from the
  * current absolute API URL. */
 
+import { useI18n } from "../lib/i18n.js";
 import { useState } from "react";
 import { CopyButton, Tabs } from "./ui.js";
 import { absoluteUrl, type ParamState } from "../lib/api.js";
 
 export function Snippets({ state, path }: { state: ParamState; path: string }) {
+  const { t } = useI18n();
   const [tab, setTab] = useState("markdown");
   const url = absoluteUrl(state.apiBase, path);
   // dual-theme snippet is independent of the current preview scheme:
@@ -16,10 +18,10 @@ export function Snippets({ state, path }: { state: ParamState; path: string }) {
     return u.toString();
   };
 
-  const markdown = `![${state.repo || "repository banner"}](${url})`;
+  const markdown = `![${state.repo || t("fallbackAlt")}](${url})`;
   const html = `<picture>
   <source media="(prefers-color-scheme: dark)" srcset="${withTheme("dark")}" />
-  <img src="${withTheme("light")}" alt="${state.repo || "repository banner"}" />
+  <img src="${withTheme("light")}" alt="${state.repo || t("fallbackAlt")}" />
 </picture>`;
 
   const content = tab === "markdown" ? markdown : tab === "html" ? html : url;
@@ -43,7 +45,7 @@ export function Snippets({ state, path }: { state: ParamState; path: string }) {
       </div>
       {tab === "html" && (
         <p className="text-xs text-ink-600">
-          GitHub 会按亮暗主题选择图片。透明插画直接融合；不透明插画底色与主题不匹配时，使用圆角插画区。
+          {t("htmlHint")}
         </p>
       )}
     </div>

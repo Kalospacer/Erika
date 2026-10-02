@@ -5,19 +5,20 @@
  * placeholder language / API base live behind 高级选项 so the form reads as a
  * short list instead of a wall of controls. */
 
+import { useI18n, type MessageKey } from "../lib/i18n.js";
 import { useState } from "react";
 import { Field, Select, TextInput, Button } from "./ui.js";
 import type { Meta, ParamState } from "../lib/api.js";
 
-const META_LABELS: Record<string, string> = {
-  stars: "Star",
-  forks: "Fork",
-  issues: "Issue",
-  release: "Release",
-  full_name: "仓库全名",
-  license: "许可证",
-  language: "主要语言",
-  last_updated: "代码更新日期",
+const META_LABELS: Partial<Record<string, MessageKey>> = {
+  stars: "stars",
+  forks: "forks",
+  issues: "issues",
+  release: "release",
+  full_name: "fullName",
+  license: "license",
+  language: "language",
+  last_updated: "lastUpdated",
 };
 
 export function ParamPanel({
@@ -33,6 +34,7 @@ export function ParamPanel({
   onRefreshMeta: () => void;
   metaError: string | null;
 }) {
+  const { t } = useI18n();
   // the server picks grokbot/avatar from the icon source when no template is
   // pinned; mirror that here so the panel shows the effective template
   const autoId = state.icon === "avatar" ? "avatar" : "grokbot";
@@ -80,40 +82,40 @@ export function ParamPanel({
 
       {metaError && (
         <p className="rounded-md border border-red-900/60 bg-red-950/40 p-2 text-xs text-red-300">
-          无法获取 /v1/meta：{metaError}
-          <Button className="ml-2" onClick={onRefreshMeta}>重试</Button>
+          {t("metaFailed")}: {metaError}
+          <Button className="ml-2" onClick={onRefreshMeta}>{t("retry")}</Button>
         </p>
       )}
 
       {meta && (
         <>
           <div className="grid grid-cols-2 gap-2">
-            <Field label="模板">
+            <Field label={t("template")}>
               <Select
                 value={state.template ?? ""}
                 onChange={(e) => patch({ template: e.target.value || null })}
                 options={[
-                  { value: "", label: "自动（按图标来源）" },
+                  { value: "", label: t("autoTemplate") },
                   ...meta.templates.map((t) => ({ value: t.id, label: t.id })),
                 ]}
               />
             </Field>
-            <Field label="主题">
+            <Field label={t("theme")}>
               <Select
                 value={state.theme ?? ""}
                 onChange={(e) => patch({ theme: e.target.value || null })}
                 options={[
-                  { value: "", label: "跟随预设" },
-                  ...(template?.themes ?? ["dark", "light"]).map((t) => ({
-                    value: t,
-                    label: t === "dark" ? "暗色" : t === "light" ? "亮色" : t,
+                  { value: "", label: t("presetDefault") },
+                  ...(template?.themes ?? ["dark", "light"]).map((theme) => ({
+                    value: theme,
+                    label: theme === "dark" ? t("dark") : theme === "light" ? t("light") : theme,
                   })),
                 ]}
               />
             </Field>
           </div>
 
-          <Field label="标题覆盖" hint={`≤ ${limits?.title ?? 25} 字，留空用仓库名`}>
+          <Field label={t("titleOverride")} hint={t("titleHint", { limit: limits?.title ?? 25 })}>
             <TextInput
               value={state.title}
               maxLength={limits?.title ?? 25}
@@ -122,7 +124,7 @@ export function ParamPanel({
             />
           </Field>
 
-          <Field label="描述覆盖" hint={`≤ ${limits?.description ?? 180} 字，留空用仓库描述`}>
+          <Field label={t("descriptionOverride")} hint={t("descriptionHint", { limit: limits?.description ?? 180 })}>
             <textarea
               value={state.description}
               maxLength={limits?.description ?? 180}
@@ -133,7 +135,7 @@ export function ParamPanel({
           </Field>
 
           <Field
-            label={`输出缩放 ${scale.toFixed(2)}`}
+            label={`${t("scale")} ${scale.toFixed(2)}`}
             hint={
               template
                 ? `${Math.round(template.canvas.width * scale)}×${Math.round(template.canvas.height * scale)}`
@@ -151,43 +153,43 @@ export function ParamPanel({
             />
           </Field>
 
-          <Field label="图标来源" hint="头像会自动切换模板">
+          <Field label={t("iconSource")} hint={t("avatarHint")}>
             <Select
               value={state.icon ?? ""}
               onChange={(e) => patch({ icon: e.target.value || null })}
               options={[
-                { value: "", label: "自动（项目图标优先）" },
-                { value: "builtin", label: "默认图标" },
-                { value: "avatar", label: "GitHub 头像" },
+                { value: "", label: t("autoIcon") },
+                { value: "builtin", label: t("defaultIcon") },
+                { value: "avatar", label: t("avatar") },
               ]}
             />
           </Field>
 
           <section aria-labelledby="icon-guide-heading" className="space-y-2 rounded-lg border border-brand-300/50 bg-brand-200/30 p-2.5 text-xs leading-relaxed text-ink-300">
-            <h2 id="icon-guide-heading" className="font-medium text-ink-100">为项目制作 Grokbot 插画</h2>
+            <h2 id="icon-guide-heading" className="font-medium text-ink-100">{t("guideTitle")}</h2>
             <a
-              href="https://grokbot-icon-studio.serio-ai.chatgpt.site/zh-hans"
+              href={t("studioUrl")}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block rounded text-brand-600 underline underline-offset-4 hover:text-ink-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
             >
-              打开 Grokbot Icon Studio 提示词页面 ↗
+              {t("studioLink")}
             </a>
             <details>
-              <summary className="cursor-pointer rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">生成后如何使用?</summary>
+              <summary className="cursor-pointer rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">{t("guideSummary")}</summary>
               <ol className="mt-2 list-decimal space-y-1.5 pl-4">
-                <li>获取提示词，配合角色参考图，在 ChatGPT 等图片生成工具中制作插画。</li>
-                <li>将图片保存到目标仓库的默认分支，例如 <code>assets/grokbot-icon.png</code>。亮暗主题共用时建议使用透明 PNG 或 WebP。</li>
-                <li>填写上方 Owner 和 Repo，图标来源选择“自动”。其他文件名可在“高级选项 → 项目图标路径”中指定。</li>
+                <li>{t("guideGenerate")}</li>
+                <li>{t("guideSave")} <code>assets/grokbot-icon.png</code>{t("period")} {t("guideTransparent")}</li>
+                <li>{t("guideUse")}</li>
               </ol>
               <p className="mt-2">
-                提示词来自{" "}
-                <a href="https://x.com/Multi_Serio_Ai/status/2100800237619347535" target="_blank" rel="noopener noreferrer" className="rounded text-brand-600 underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">@Multi_Serio_Ai</a>。
+                {t("guideCredit")}{" "}
+                <a href="https://x.com/Multi_Serio_Ai/status/2100800237619347535" target="_blank" rel="noopener noreferrer" className="rounded text-brand-600 underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">@Multi_Serio_Ai</a>{t("period")}
               </p>
             </details>
           </section>
 
-          <Field label="元数据">
+          <Field label={t("metadata")}>
             <div className="flex flex-wrap gap-x-3 gap-y-1.5 pt-0.5">
               {(template?.metaFields ?? []).map((field) => (
                 <label key={field} className="flex items-center gap-1.5 text-xs text-ink-300">
@@ -197,11 +199,11 @@ export function ParamPanel({
                     onChange={(e) => toggleMeta(field, e.target.checked)}
                     className="accent-brand-500"
                   />
-                  {META_LABELS[field] ?? field}
+                  {META_LABELS[field] ? t(META_LABELS[field]) : field}
                 </label>
               ))}
               {(template?.metaFields ?? []).length === 0 && (
-                <span className="text-xs text-ink-600">该模板未声明元数据字段</span>
+                <span className="text-xs text-ink-600">{t("noMetadata")}</span>
               )}
             </div>
           </Field>
@@ -212,10 +214,10 @@ export function ParamPanel({
             className="group rounded-lg border border-ink-700 bg-ink-900"
           >
             <summary className="cursor-pointer select-none rounded-md px-2.5 py-2 text-xs text-ink-300 transition-colors hover:text-ink-100">
-              高级选项
+              {t("advanced")}
             </summary>
             <div className="space-y-3 border-t border-ink-700 p-2.5">
-              <Field label="项目图标路径" hint="仓库内相对路径">
+              <Field label={t("iconPath")} hint={t("relativePath")}>
                 <TextInput
                   value={state.iconPath}
                   onChange={(e) => patch({ iconPath: e.target.value })}
@@ -225,43 +227,43 @@ export function ParamPanel({
               </Field>
 
               <div className="grid grid-cols-2 gap-2">
-                <Field label="图标展示">
+                <Field label={t("iconDisplay")}>
                   <Select
                     value={state.iconFit ?? ""}
                     onChange={(e) => patch({ iconFit: e.target.value || null })}
                     options={[
-                      { value: "", label: "跟随模板" },
-                      { value: "contain", label: "完整展示" },
-                      { value: "cover", label: "裁剪填满" },
+                      { value: "", label: t("templateDefault") },
+                      { value: "contain", label: t("contain") },
+                      { value: "cover", label: t("cover") },
                     ]}
                   />
                 </Field>
-                <Field label="圆形裁剪">
+                <Field label={t("roundCrop")}>
                   <Select
                     value={state.iconRound ?? ""}
                     onChange={(e) => patch({ iconRound: e.target.value || null })}
                     options={[
-                      { value: "", label: "跟随模板" },
-                      { value: "1", label: "圆形" },
-                      { value: "0", label: "方形" },
+                      { value: "", label: t("templateDefault") },
+                      { value: "1", label: t("circle") },
+                      { value: "0", label: t("square") },
                     ]}
                   />
                 </Field>
               </div>
 
-              <Field label="占位图语言">
+              <Field label={t("placeholderLanguage")}>
                 <Select
                   value={state.lang ?? ""}
                   onChange={(e) => patch({ lang: e.target.value || null })}
                   options={[
-                    { value: "", label: "跟随界面" },
-                    { value: "zh", label: "中文" },
+                    { value: "", label: t("followInterface") },
+                    { value: "zh", label: t("chinese") },
                     { value: "en", label: "English" },
                   ]}
                 />
               </Field>
 
-              <Field label="API 基址" hint="留空 = 同源">
+              <Field label={t("apiBase")} hint={t("sameOrigin")}>
                 <TextInput
                   value={state.apiBase}
                   onChange={(e) => patch({ apiBase: e.target.value })}

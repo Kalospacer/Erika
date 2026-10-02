@@ -6,7 +6,8 @@ import { readStateFromUrl, writeStateToUrl } from "./lib/url-state.js";
 import { ParamPanel } from "./components/param-panel.js";
 import { PreviewStage } from "./components/preview-stage.js";
 import { Snippets } from "./components/snippets.js";
-import { Button, CopyButton } from "./components/ui.js";
+import { useI18n } from "./lib/i18n.js";
+import { Button, CopyButton, Select } from "./components/ui.js";
 import { Sun, Moon, Maximize2, Minimize2, RotateCcw } from "lucide-react";
 
 const DEFAULT_STATE = {
@@ -37,6 +38,7 @@ function useDebounced<T>(value: T, ms: number): T {
 }
 
 export default function App() {
+  const { locale, setLocale, t } = useI18n();
   const [state, setState] = useState(() => ({ ...DEFAULT_STATE, ...readStateFromUrl() }));
   const patch = useCallback((p: Partial<typeof state>) => {
     setState((old) => ({ ...old, ...p }));
@@ -59,10 +61,11 @@ export default function App() {
   }, [state.apiBase, metaTick]);
 
   useEffect(() => {
-    writeStateToUrl(state);
-  }, [state]);
+    writeStateToUrl(state, locale);
+  }, [state, locale]);
 
-  const path = useMemo(() => bannerPath(state), [state]);
+  const bannerState = useMemo(() => ({ ...state, lang: state.lang ?? (locale === "zh-CN" ? "zh" : "en") }), [state, locale]);
+  const path = useMemo(() => bannerPath(bannerState), [bannerState]);
   const debouncedPath = useDebounced(path, 300);
   const [image, setImage] = useState<PreviewImage | null>(null);
   const [loading, setLoading] = useState(false);
@@ -103,7 +106,7 @@ export default function App() {
     <div className="mx-auto flex min-h-full max-w-6xl flex-col gap-4 p-4 lg:flex-row">
       {/* main column */}
       <main className="min-w-0 flex-1 space-y-4">
-        <header className="flex items-center justify-between gap-3">
+        <header className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="flex items-center gap-2.5 text-lg font-semibold">
             <img
               src={`${import.meta.env.BASE_URL}icon-192.png`}
@@ -113,14 +116,21 @@ export default function App() {
             />
             <span className="text-brand-600">Erika</span>
           </h1>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Select
+              aria-label={t("interfaceLanguage")}
+              className="w-auto max-w-32"
+              value={locale}
+              onChange={(e) => setLocale(e.target.value === "zh-CN" ? "zh-CN" : "en")}
+              options={[{ value: "zh-CN", label: "简体中文" }, { value: "en", label: "English" }]}
+            />
             <Button onClick={() => patch({ scheme: state.scheme === "dark" ? "light" : "dark" })}>
               {state.scheme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
-              {state.scheme === "dark" ? "亮色模拟" : "暗色模拟"}
+              {state.scheme === "dark" ? t("lightPreview") : t("darkPreview")}
             </Button>
-            <Button onClick={() => patch({ scale: state.scale == null ? 1 : null })} title="原始尺寸 = scale 1">
+            <Button onClick={() => patch({ scale: state.scale == null ? 1 : null })} title={t("originalSizeHint")}>
               {state.scale == null ? <Maximize2 size={14} /> : <Minimize2 size={14} />}
-              {state.scale == null ? "查看原始尺寸" : "回到 README 比例"}
+              {state.scale == null ? t("originalSize") : t("readmeSize")}
             </Button>
           </div>
         </header>
@@ -135,9 +145,9 @@ export default function App() {
           canvas={template?.canvas ?? null}
         />
 
-        {path && <Snippets state={state} path={path} />}
+        {path && <Snippets state={bannerState} path={path} />}
 
-        <p className="text-xs text-ink-600">预览取自真实 API 响应；URL 即配置，可直接分享。</p>
+        <p className="text-xs text-ink-600">{t("previewHint")}</p>
       </main>
 
       {/* side panel */}
@@ -153,14 +163,13 @@ export default function App() {
         <div className="flex gap-2 border-t border-ink-700 pt-3">
           <CopyButton
             text={path ? `${(state.apiBase || window.location.origin).replace(/\/$/, "")}${path}` : ""}
-            label="复制图片 URL"
+            label={t("copyUrl")}
           />
-          <Button onClick={() => setState({ ...DEFAULT_STATE })} title="恢复演示配置">
-              <RotateCcw size={14} /> 重置
+          <Button onClick={() => setState({ ...DEFAULT_STATE })} title={t("resetHint")}>
+              <RotateCcw size={14} /> {t("reset")}
             </Button>
         </div>
       </aside>
     </div>
   );
 }
-

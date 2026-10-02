@@ -11,10 +11,14 @@
 </p>
 
 <p align="center">
+  <strong>简体中文</strong> · <a href="README.en.md">English</a>
+</p>
+
+<p align="center">
   <a href="https://erika.snowy.moe/">🎨 在线预览</a> ·
   <a href="#快速开始">🚀 快速开始</a> ·
   <a href="#部署">📦 部署指南</a> ·
-  <a href="#api">📖 API</a>
+  <a href="#其他-api-端点">📖 API</a>
 </p>
 
 ## 简介✨
@@ -25,7 +29,7 @@ Erika 是一个为 GitHub 仓库生成 Banner 的服务。她把项目插画、�
 
 你可以使用自己的插画、GitHub 头像，或直接使用 Erika 的内置插画。在 Playground 中调整样式后，复制 Markdown 即可嵌入。也可以通过 GitHub Actions 定时生成图片，直接保存到仓库。
 
-## 功能🪄
+## 特性🪄
 
 - **仓库信息**：读取公开仓库的名称、描述、星标、Fork 数、开放的 Issue / PR 数和最新 Release。
 - **插画与头像**：支持仓库内的图片、GitHub 头像和内置插画，提供两种排版模板。
@@ -36,17 +40,26 @@ Erika 是一个为 GitHub 仓库生成 Banner 的服务。她把项目插画、�
 
 ## 快速开始🚀
 
-打开 [Playground](https://erika.snowy.moe/)，填写仓库的 Owner 和 Repo，调整图标、文字及主题，然后复制页面生成的 Markdown。
+首先你需要一张 GrokBot Icon 风格的图片。
 
-Playground 支持简体中文和英文，可在页面顶部切换。界面语言按分享链接中的 `uiLang`、已保存的选择、浏览器语言依次确定；其他语言默认使用英文。语言选择会保存在浏览器和分享链接中，例如 `?uiLang=en`。切换界面语言保留当前配置，仓库名称和描述保持原文；占位图默认跟随界面，也可在高级选项中单独指定语言。
+<details>
+<summary>没有 GrokBot Icon？以下是生成指南</summary>
+
+1. 前往 [由 @Multi_Serio_Ai 制作的 Grokbot Icon Studio 提示词页面](https://grokbot-icon-studio.serio-ai.chatgpt.site/) 生成属于你项目的插画。除了网页自带的提示词，你还可以简单介绍一下你项目的用途，甚至上传与该项目/个人账号相关的动漫角色立绘。
+
+2. （可选的）我们推荐再生成一张不带背景的 GrokBot Icon 用于动态主题切换
+
+3. 将生成好的插画放在项目的 `assets/` 目录中，并命名为 `grokbot-icon.png` (或是压缩后的 `.webp`); 如果有透明版本则命名为 `erika-icon-transparent.png`
+
+</details>
+
+打开 [Playground](https://erika.snowy.moe/)，填写仓库的 Owner 和 Repo，调整图标、文字及主题，然后复制页面生成的 Markdown, URL 或 HTML 代码。
 
 也可以直接把下面的内容放进 README，将 `Moemu/Erika` 替换为你的公开仓库：
 
 ```markdown
 ![项目 Banner](https://erika.snowy.moe/v1/banner/Moemu/Erika.webp)
 ```
-
-如果使用自己部署的服务，将域名替换为你的服务地址即可。
 
 <details>
 <summary>跟随 GitHub 的亮暗主题</summary>
@@ -60,19 +73,15 @@ Playground 支持简体中文和英文，可在页面顶部切换。界面语言
 </picture>
 ```
 
-透明插画直接融入主题背景。内置 Erika 插画会在显式主题下使用透明版；不透明插画的底色与主题不匹配时，显示为圆角插画区。省略 `theme` 时，继续使用原有的自动背景模式。
-
 </details>
 
-## 自定义⚙️
+最后启动你的 Markdown 编辑器看看效果吧 Ciallo～(∠・ω< )⌒☆
+
+## 参数说明⚙️
 
 ### 项目图标
 
-还没有项目插画？可以从 [Grokbot Icon Studio 中文页面](https://grokbot-icon-studio.serio-ai.chatgpt.site/zh-hans)获取提示词，配合角色参考图，在 ChatGPT 等图片生成工具中制作 Grokbot 风格插画。仓库使用的 Grokbot Icon 主要通过这套提示词生成。
-
-将生成的图片保存到目标仓库的默认分支，例如 `assets/grokbot-icon.png`。回到 Playground，填写 Owner 和 Repo，保持图标来源为“自动”，即可预览 Banner。使用其他文件名时，在“高级选项 → 项目图标路径”中填写实际路径。亮暗主题共用的插画建议使用透明 PNG 或 WebP。
-
-默认会从目标仓库的默认分支中，依次查找以下文件。找不到可用图片时，使用 Erika 的内置插画：
+在未指定图标路径时，Erika 默认会从目标仓库的主分支中，依次查找以下文件。若失败则回退到 Erika 的内置插画：
 
 ```text
 assets/grokbot-icon.webp
@@ -84,15 +93,12 @@ assets/grokbot-icon.jpg
 
 | 用法 | 效果 |
 | --- | --- |
-| `?iconPath=assets/my-icon.webp` | 使用目标仓库内的指定图片 |
+| `?iconPath=assets/my-icon.webp` | 使用目标仓库内的指定图片（主分支，使用相对路径） |
 | `?icon=avatar` | 使用仓库所属用户或组织的 GitHub 头像 |
 | `?icon=builtin` | 使用 Erika 的内置插画 |
 | `?icon=avatar&iconFit=cover&iconRound=1` | 使用填满图标区域的圆形头像 |
 
-`iconPath` 接受仓库内的相对路径。多个参数用 `&` 连接。
-
 建议为亮暗主题共用的插画提供透明 PNG 或 WebP。服务会保留图片像素，不会自动抠图或改变人物颜色。
-自托管服务的项目预设可用 `icon.pathTransparent` 指定透明版，或用 `icon.pathLight` 指定亮色版；路径均属于目标仓库。亮色请求依次尝试亮色版、透明版和原图，暗色请求尝试透明版和原图。`iconPath` 始终覆盖预设选择。
 
 ### 排版模板
 
@@ -121,9 +127,25 @@ https://erika.snowy.moe/v1/banner/Moemu/Erika.webp?meta=stars,release
 
 Grokbot 和 Avatar 模板还支持 `license`、`language`、`last_updated`，可在 Playground 中勾选，或使用 `?meta=license,language,last_updated`。默认仍显示仓库全名、Star、Fork、Issue 和 Release。
 
-`license` 显示 GitHub 识别的 SPDX 标识；未识别的许可证不显示。`language` 显示主要语言。`last_updated` 使用仓库的 `pushed_at`，按 UTC 显示为 `YYYY-MM-DD`。这些字段来自现有仓库请求，不增加请求次数。缺失字段会跳过；过长的元数据行先缩小字号，再省略过长的值。
+`license` 显示 GitHub 识别的 SPDX 标识；未识别的许可证不显示。`language` 显示主要语言。`last_updated` 使用仓库的 `pushed_at`，按 UTC 显示为 `YYYY-MM-DD`。
 
-描述里可以用 `**…**` 标记一段强调文字：成对出现时该段用主题的强调色绘制，标记本身不参与排版度量（不占宽度、不影响换行与自动缩排）；落单的 `**` 按字面输出。例如 `?description=An **event-loop** chatbot`。
+描述里可以用 `**…**` 标记一段强调文字，例如 `?description=An **event-loop** chatbot`。
+
+### 其他参数说明
+
+| 参数 | 说明 |
+| --- | --- |
+| `theme` | `light` / `dark`；省略时根据插画背景自动配色；显式主题决定底色与文字配色，插画按透明度与背景兼容性融合或使用圆角兜底 |
+| `icon` | `auto` / `avatar` / `builtin`，默认 `auto` |
+| `iconPath` | 仓库内的图片相对路径，最长 128 个字符 |
+| `iconFit` | `contain` 保留完整图片，`cover` 填满区域并裁切 |
+| `iconRound` | `1` 启用圆形遮罩，`0` 关闭 |
+| `title` | 覆盖标题，最长 25 个字符（版式在该长度下仍完整显示） |
+| `description` | 覆盖描述，最长 180 个字符（超出 0.75 倍下限的排版容量会截断） |
+| `meta` | 逗号分隔的字段：`full_name`、`stars`、`forks`、`issues`、`release`、`license`、`language`、`last_updated`；需由所选模板支持 |
+| `scale` | 缩放比例，范围为 0.1～1；默认 0.5，输出 1500 × 900 图片 |
+| `lang` | 错误占位图语言，`en` / `zh`，默认 `en` |
+| `fresh` | `fresh=1` 使用 `Cache-Control: no-cache`，让图片代理验证源站；GitHub 数据仍受 Provider 缓存有效期影响 |
 
 ## 部署📦
 
@@ -174,9 +196,7 @@ docker run -d --name erika -p 8787:8787 --env-file .env erika:local
 
 需要自定义项目预设时，在构建镜像前编辑 [预设配置](apps/api/presets/presets.json)，或将包含 `presets.json` 的目录只读挂载到容器的 `/app/apps/api/presets`。预设在启动时读取，修改挂载文件后需要重启容器。
 
-## API
-
-以下路径相对于你的服务地址：
+## 其他 API 端点🧪
 
 | 请求 | 用途 |
 | --- | --- |
@@ -185,30 +205,6 @@ docker run -d --name erika -p 8787:8787 --env-file .env erika:local
 | `GET /v1/meta` | 查询模板、主题、支持的字段和参数限制 |
 | `GET /doc` | 获取 OpenAPI 描述 |
 | `GET /healthz` | 检查服务状态 |
-
-### 查询参数
-
-| 参数 | 说明 |
-| --- | --- |
-| `theme` | `light` / `dark`；省略时根据插画背景自动配色；显式主题决定底色与文字配色，插画按透明度与背景兼容性融合或使用圆角兜底 |
-| `icon` | `auto` / `avatar` / `builtin`，默认 `auto` |
-| `iconPath` | 仓库内的图片相对路径，最长 128 个字符 |
-| `iconFit` | `contain` 保留完整图片，`cover` 填满区域并裁切 |
-| `iconRound` | `1` 启用圆形遮罩，`0` 关闭 |
-| `title` | 覆盖标题，最长 25 个字符（版式在该长度下仍完整显示） |
-| `description` | 覆盖描述，最长 180 个字符（超出 0.75 倍下限的排版容量会截断） |
-| `meta` | 逗号分隔的字段：`full_name`、`stars`、`forks`、`issues`、`release`、`license`、`language`、`last_updated`；需由所选模板支持 |
-| `scale` | 缩放比例，范围为 0.1～1；默认 0.5，输出 1500 × 900 图片 |
-| `lang` | 错误占位图语言，`en` / `zh`，默认 `en` |
-| `fresh` | `fresh=1` 使用 `Cache-Control: no-cache`，让图片代理验证源站；GitHub 数据仍受 Provider 缓存有效期影响 |
-
-### 缓存与错误处理
-
-图片响应带有 `ETag` 和 `Cache-Control`，客户端可使用条件请求复用图片。仓库数据和图片均有缓存，星标变化不会立刻反映到所有客户端。GitHub README 还会经过 Camo 图片代理，其刷新时间可能晚于源站。
-
-需要 README 定期反映仓库变化时，可在固定图片 URL 中加入 `fresh=1`。亮暗 `<picture>` 的所有图片 URL 应使用相同设置。独立实测中，该模式在仓库描述变化后约 29 分钟自然更新，无需 PURGE 或更换 URL；此结果是一次观测，不是更新时间保证。它仍受默认 30 分钟的 GitHub 数据新鲜期影响，不能强制立即拉取新数据。
-
-仓库不存在或为私有时，API 返回错误占位图，并通过 `X-Banner-Error` 说明原因。GitHub 暂时不可用时，服务优先使用有效期内的旧数据；没有可用数据时返回占位图。参数错误返回 `400`，服务繁忙可能返回 `503`。
 
 ## 本地开发🛠️
 
@@ -236,7 +232,7 @@ pnpm --filter @erika/playground dev
 
 Playground 地址为 `http://localhost:5173`，API 地址为 `http://localhost:8787`。开发预览页会将 API 请求转发到后端。
 
-### 命令行出图
+### CLI 用法
 
 在仓库根目录运行以下命令，读取 GitHub 数据并保存图片：
 
@@ -269,8 +265,6 @@ node scripts/acceptance-docker.mjs erika:local
 ```
 
 验收脚本通过真实 HTTP 路由检查上游超时、限流、旧图降级、错误占位和恢复刷新，并测量首次出图、缓存请求、并发渲染与队列拒绝。测试使用隔离的固定上游，不访问真实 GitHub，也不向线上服务压测。报告、图片和容器日志保存在 `out/acceptance-*/`。内存数据为各批次结束后的采样，不能作为峰值；首次容器请求也不代表 Vercel 冷启动。
-
-远程复测数据与线上验收边界见 [运行时验收记录](docs/runtime-acceptance.md)。
 
 如果需要从 PSD 提取图层和文字样式，参考 [PSD 工具说明](packages/psd-toolkit/README.md)。
 

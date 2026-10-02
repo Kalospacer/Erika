@@ -19,6 +19,8 @@
 
 ## 简介✨
 
+受 [@Multi_Serio_Ai](https://x.com/Multi_Serio_Ai/status/2100800237619347535) 的 [Grokbot Icon Studio 提示词页面](https://grokbot-icon-studio.serio-ai.chatgpt.site/)启发，我们制作了 Erika。
+
 Erika 是一个为 GitHub 仓库生成 Banner 的服务。她把项目插画、名称、描述和星标等信息排成一张图片，让你通过一个 URL 把项目介绍放进 README。
 
 你可以使用自己的插画、GitHub 头像，或直接使用 Erika 的内置插画。在 Playground 中调整样式后，复制 Markdown 即可嵌入。也可以通过 GitHub Actions 定时生成图片，直接保存到仓库。
@@ -63,6 +65,10 @@ Erika 是一个为 GitHub 仓库生成 Banner 的服务。她把项目插画、�
 ## 自定义⚙️
 
 ### 项目图标
+
+还没有项目插画？可以从 [Grokbot Icon Studio 中文页面](https://grokbot-icon-studio.serio-ai.chatgpt.site/zh-hans)获取提示词，配合角色参考图，在 ChatGPT 等图片生成工具中制作 Grokbot 风格插画。仓库使用的 Grokbot Icon 主要通过这套提示词生成。
+
+将生成的图片保存到目标仓库的默认分支，例如 `assets/grokbot-icon.png`。回到 Playground，填写 Owner 和 Repo，保持图标来源为“自动”，即可预览 Banner。使用其他文件名时，在“高级选项 → 项目图标路径”中填写实际路径。亮暗主题共用的插画建议使用透明 PNG 或 WebP。
 
 默认会从目标仓库的默认分支中，依次查找以下文件。找不到可用图片时，使用 Erika 的内置插画：
 
@@ -273,7 +279,7 @@ Erika（絵里香）是一位为仓库绘制肖像的画师少女。项目从手
 感谢以下项目与资源：
 
 - [Shields.io](https://shields.io/)：以 URL 配置图片的使用方式。
-- [Grokbot Icon Studio](https://grokbot-icon-studio.serio-ai.chatgpt.site/zh-hans)：内置插画的提示词来源。本项目仅引用链接，不收录提示词。
+- [@Multi_Serio_Ai](https://x.com/Multi_Serio_Ai/status/2100800237619347535) 与 [Grokbot Icon Studio](https://grokbot-icon-studio.serio-ai.chatgpt.site/zh-hans)：项目灵感与 Grokbot 风格插画的提示词来源。本项目仅引用链接，不收录提示词。
 - [Hono](https://hono.dev/) 与 [Canvas](https://github.com/Brooooooklyn/canvas)：API 服务与图片渲染。
 
 代码、文档及模板配置采用 [MIT](LICENSE) 许可证，再分发时请保留许可声明。

@@ -163,6 +163,30 @@ export function ParamPanel({
             />
           </Field>
 
+          <section aria-labelledby="icon-guide-heading" className="space-y-2 rounded-lg border border-brand-300/50 bg-brand-200/30 p-2.5 text-xs leading-relaxed text-ink-300">
+            <h2 id="icon-guide-heading" className="font-medium text-ink-100">为项目制作 Grokbot 插画</h2>
+            <a
+              href="https://grokbot-icon-studio.serio-ai.chatgpt.site/zh-hans"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block rounded text-brand-600 underline underline-offset-4 hover:text-ink-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+            >
+              打开 Grokbot Icon Studio 提示词页面 ↗
+            </a>
+            <details>
+              <summary className="cursor-pointer rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">生成后如何使用?</summary>
+              <ol className="mt-2 list-decimal space-y-1.5 pl-4">
+                <li>获取提示词，配合角色参考图，在 ChatGPT 等图片生成工具中制作插画。</li>
+                <li>将图片保存到目标仓库的默认分支，例如 <code>assets/grokbot-icon.png</code>。亮暗主题共用时建议使用透明 PNG 或 WebP。</li>
+                <li>填写上方 Owner 和 Repo，图标来源选择“自动”。其他文件名可在“高级选项 → 项目图标路径”中指定。</li>
+              </ol>
+              <p className="mt-2">
+                提示词来自{" "}
+                <a href="https://x.com/Multi_Serio_Ai/status/2100800237619347535" target="_blank" rel="noopener noreferrer" className="rounded text-brand-600 underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">@Multi_Serio_Ai</a>。
+              </p>
+            </details>
+          </section>
+
           <Field label="元数据">
             <div className="flex flex-wrap gap-x-3 gap-y-1.5 pt-0.5">
               {(template?.metaFields ?? []).map((field) => (

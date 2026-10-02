@@ -1,4 +1,4 @@
-/** Shared query-param schema and resource limits (design doc section 7.2 / 10.1). */
+/** Shared query-param schema and resource limits. */
 
 import { z } from "zod";
 

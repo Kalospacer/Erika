@@ -16,7 +16,7 @@ erika-psd extract <path/to/banner.psd> --out packages/templates/extracted/<name>
 | `assets/icon.<png\|jpg>` | 图标智能对象的原始内容 |
 | `styles.json` | 文本层逐 run 样式（字体、字号、字距、颜色、run 长度、段落属性） |
 | `template.draft.json` | 机器草稿（含待校准假设的注释） |
-| `extraction-report.json` | 证据报告：工具版本、命令、图层清单、背景取样、不支持的效果诊断（见设计文档 5.2 节） |
+| `extraction-report.json` | 证据报告：工具版本、命令、图层清单、背景取样、不支持的效果诊断 |
 
 ## 支持范围
 

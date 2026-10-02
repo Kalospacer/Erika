@@ -1,5 +1,4 @@
-/** GitHub DataProvider implementing the caching strategy from docs/design.md
- * section 6.2: snapshot TTL + SWR, ETag conditional revalidation, single-flight,
+/** GitHub DataProvider: snapshot TTL + SWR, ETag conditional revalidation, single-flight,
  * negative cache for not-found, transient short cache via per-repo exponential
  * backoff, upstream Retry-After honored exactly, primary-quota global pause,
  * bounded maps, and a hard private-repo rejection. */

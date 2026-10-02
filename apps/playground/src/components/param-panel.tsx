@@ -1,5 +1,5 @@
 /** Parameter panel: rendered from /v1/meta so new server capabilities show up
- * without a playground release (design doc section 8).
+ * without a playground release.
  *
  * Layout: the everyday fields stay visible; icon path / display overrides /
  * placeholder language / API base live behind 高级选项 so the form reads as a

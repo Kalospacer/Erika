@@ -1,4 +1,4 @@
-/** Icon archetype routing through the API (docs/design.md 5.3):
+/** Icon archetype routing through the API:
  * - a project's own Grokbot icon (public path in the subject repo) with a
  *   uniform top-right backdrop adopts that backdrop as the canvas colour and
  *   blends full-bleed in the template's blend box;

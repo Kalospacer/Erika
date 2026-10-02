@@ -1,5 +1,5 @@
 /** URL-as-state: every playground parameter lives in the query string so any
- * panel configuration is shareable by link (design doc section 8). */
+ * panel configuration is shareable by link. */
 
 import type { ParamState } from "./api.js";
 import type { Locale } from "./locale.js";

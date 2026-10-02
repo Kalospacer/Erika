@@ -84,7 +84,7 @@ export class QueueOverflowError extends Error {
 
 /** Bounded render queue: fixed concurrency + max waiting tasks. Protects
  * process memory (decode/draw/encode) independently of the byte-bounded LRU
- * and of any reverse-proxy IP rate limiting (design doc 10.1). */
+ * and of any reverse-proxy IP rate limiting. */
 export class RenderQueue {
   private active = 0;
   private waiting: Array<() => void> = [];

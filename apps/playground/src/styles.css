@@ -61,7 +61,7 @@ body {
     0 8px 24px rgba(34, 31, 43, 0.05);
 }
 
-/* 纯 CSS 梅花标记（与 public/erika.svg 同形，改品牌浅紫） */
+/* 品牌浅紫色 CSS 梅花标记。 */
 .blossom {
   display: inline-block;
   width: 1em;

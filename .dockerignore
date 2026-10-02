@@ -12,3 +12,9 @@ work
 *.tsbuildinfo
 **/__pycache__
 packages/psd-toolkit
+
+# Local one-off migration and acceptance files
+patch_types.py
+outwith-desc.webp
+scripts/acceptance-docker.mjs
+scripts/fixtures/acceptance-upstream.mjs

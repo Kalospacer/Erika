@@ -260,15 +260,14 @@ pnpm typecheck:vercel
 
 `pnpm test` includes unit tests, API tests, and visual regression. Start in the [template directory](packages/templates/) to add templates. The API is in `apps/api`, the preview is in `apps/playground`, the renderer is in `packages/core`, and GitHub data access is in `packages/providers`.
 
-After building the image, run container acceptance checks:
+After building the image, run the container smoke test:
 
 ```bash
 docker build -t erika:local .
 node scripts/smoke-docker.mjs erika:local
-node scripts/acceptance-docker.mjs erika:local
 ```
 
-The acceptance script uses real HTTP routes to check upstream timeouts, rate limits, stale-image fallback, error placeholders, and recovery. It measures first render, cached requests, concurrent rendering, and queue rejection. Tests use an isolated, fixed upstream. They do not access real GitHub or load-test production. Reports, images, and container logs are saved in `out/acceptance-*/`. Memory samples are taken after each batch and do not measure peak usage. The first container request does not represent a Vercel cold start.
+The container smoke test checks page assets, banner rendering, cache responses, and error placeholders through real HTTP routes. It uses a fixed upstream without accessing real GitHub.
 
 To extract layers and text styles from PSD files, see the [PSD toolkit guide](packages/psd-toolkit/README.md).
 

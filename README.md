@@ -260,15 +260,14 @@ pnpm typecheck:vercel
 
 `pnpm test` 包含单元测试、接口测试和视觉回归。新增模板可从 [模板目录](packages/templates/) 开始；API 位于 `apps/api`，预览页位于 `apps/playground`，渲染器位于 `packages/core`，GitHub 数据访问位于 `packages/providers`。
 
-构建镜像后，可运行独立容器验收：
+构建镜像后，可运行容器冒烟测试：
 
 ```bash
 docker build -t erika:local .
 node scripts/smoke-docker.mjs erika:local
-node scripts/acceptance-docker.mjs erika:local
 ```
 
-验收脚本通过真实 HTTP 路由检查上游超时、限流、旧图降级、错误占位和恢复刷新，并测量首次出图、缓存请求、并发渲染与队列拒绝。测试使用隔离的固定上游，不访问真实 GitHub，也不向线上服务压测。报告、图片和容器日志保存在 `out/acceptance-*/`。内存数据为各批次结束后的采样，不能作为峰值；首次容器请求也不代表 Vercel 冷启动。
+容器冒烟测试通过真实 HTTP 路由检查页面资源、Banner 渲染、缓存响应和错误占位。测试使用固定上游，不访问真实 GitHub。
 
 如果需要从 PSD 提取图层和文字样式，参考 [PSD 工具说明](packages/psd-toolkit/README.md)。
 

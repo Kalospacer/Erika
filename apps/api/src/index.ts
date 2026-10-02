@@ -23,8 +23,7 @@ const token = process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN;
 if (!token) {
   console.warn(
     "[erika] GITHUB_TOKEN is not set: unauthenticated GitHub quota is 60 req/h and " +
-      "production traffic WILL be rate limited. Copy .env.example to .env and fill it in " +
-      "(design doc 6.2).",
+      "production traffic WILL be rate limited. Copy .env.example to .env and fill it in.",
   );
 } else {
   console.log(`[erika] GitHub token configured (${mask(token)})`);

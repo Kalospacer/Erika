@@ -10,7 +10,7 @@ Extracts from a PSD file:
 Outputs (under --out):
 - assets/icon.<png|jpg>          raw smart-object content
 - styles.json                    measured text-layer data (evidence)
-- extraction-report.json         evidence per docs/design.md section 5.2
+- extraction-report.json         tool version, command, layers, and diagnostics
 - template.draft.json            machine-draft for the final handwritten template
 """
 

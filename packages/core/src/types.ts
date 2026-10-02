@@ -1,4 +1,4 @@
-/** Erika template / data / preset schema. See docs/design.md section 5.3. */
+/** Erika template / data / preset schema. */
 
 import type { MetaField } from "@erika/shared";
 
@@ -79,7 +79,7 @@ export interface IconSlot extends IconBox {
   frame?: { padding: number; radius: number };
 }
 
-/** Ratio layout in template data files (docs/design.md 5.3): every value is a
+/** Ratio layout in template data files: every value is a
  * fraction of the canvas, induced from the reference PSDs by `erika-psd induce`.
  * The loader expands it into absolute slot geometry, so published templates
  * carry no project-specific pixel values. */

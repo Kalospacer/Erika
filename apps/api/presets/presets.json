@@ -1,5 +1,5 @@
 {
-  "$comment": "Erika 项目预设注册表 —— repo 全名 -> 预设。预设只描述「这个项目提供了什么」：主题配色，以及图标在该项目仓库内的相对路径（走公开路径 raw.githubusercontent.com，任何使用者一样）。版式一律来自模板的比例布局（docs/design.md 5.3），预设不携带任何像素值。图标路径取不到的仓库会回落到模板的默认插画（Erika 形象）。",
+  "$comment": "Erika 项目预设注册表 —— repo 全名 -> 预设。预设只描述「这个项目提供了什么」：主题配色，以及图标在该项目仓库内的相对路径（走公开路径 raw.githubusercontent.com，任何使用者一样）。版式一律来自模板的比例布局，预设不携带任何像素值。图标路径取不到的仓库会回落到模板的默认插画（Erika 形象）。",
   "Moemu/Erika": {
     "template": "grokbot",
     "title": "Erika",

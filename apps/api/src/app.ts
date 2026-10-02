@@ -1,5 +1,4 @@
-/** Erika banner API routes (M2). Failure taxonomy and cache headers follow
- * docs/design.md sections 6.2/6.3/7.3. */
+/** Banner API routes, placeholder responses, and cache headers. */
 
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
@@ -109,7 +108,7 @@ export function createApp(deps: ApiDeps) {
 
   const app = new Hono();
 
-  // CORS contract (design 7.3): open for Playground; expose operational headers
+  // Allow Playground clients to read cache and rendering headers.
   app.use("*", async (c, next) => {
     await next();
     c.header("Access-Control-Allow-Origin", "*");

@@ -19,3 +19,8 @@ docs/examples/mas-readme-banner.md
 packages/core/scripts/render-theme.cjs
 /*.webp
 tmp/
+
+# Local one-off migration and acceptance helpers
+/patch_types.py
+/scripts/acceptance-docker.mjs
+/scripts/fixtures/acceptance-upstream.mjs

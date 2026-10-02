@@ -19,7 +19,7 @@ function readJson(path: string): unknown {
   return JSON.parse(readFileSync(path, "utf-8"));
 }
 
-/** Expand a ratio layout into absolute slot geometry (docs/design.md 5.3).
+/** Expand a ratio layout into absolute slot geometry.
  * Templates in the tree only carry percentages; pixel values live here. */
 function resolveLayout(tpl: Template): Template {
   const layout = tpl.layout;
@@ -88,7 +88,7 @@ export interface TemplateInfo {
   capabilities: Template["capabilities"];
   formats: string[];
   canvas: { width: number; height: number };
-  /** icon sources this template is meant for (see docs/design.md 5.3) */
+  /** icon sources this template is meant for */
   sources: string[];
   /** metadata fields the template declares (topline + footer) */
   metaFields: string[];

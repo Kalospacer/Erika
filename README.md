@@ -182,7 +182,7 @@ docker run -d --name erika -p 8787:8787 --env-file .env erika:local
 
 | 参数 | 说明 |
 | --- | --- |
-| `theme` | `light` / `dark`；省略时根据插画背景自动配色（推荐）；显式指定会关闭背景融合，图标自带底色直接显示 |
+| `theme` | `light` / `dark`；省略时根据插画背景自动配色；显式主题决定底色与文字配色，插画按透明度与背景兼容性融合或使用圆角兜底 |
 | `icon` | `auto` / `avatar` / `builtin`，默认 `auto` |
 | `iconPath` | 仓库内的图片相对路径，最长 128 个字符 |
 | `iconFit` | `contain` 保留完整图片，`cover` 填满区域并裁切 |
@@ -192,11 +192,13 @@ docker run -d --name erika -p 8787:8787 --env-file .env erika:local
 | `meta` | 逗号分隔的字段：`full_name`、`stars`、`forks`、`issues`、`release`、`license`、`language`、`last_updated`；需由所选模板支持 |
 | `scale` | 缩放比例，范围为 0.1～1；默认 0.5，输出 1500 × 900 图片 |
 | `lang` | 错误占位图语言，`en` / `zh`，默认 `en` |
-| `fresh` | `fresh=1` 让响应使用 `Cache-Control: no-cache`，便于检查源站响应 |
+| `fresh` | `fresh=1` 使用 `Cache-Control: no-cache`，让图片代理验证源站；GitHub 数据仍受 Provider 缓存有效期影响 |
 
 ### 缓存与错误处理
 
 图片响应带有 `ETag` 和 `Cache-Control`，客户端可使用条件请求复用图片。仓库数据和图片均有缓存，星标变化不会立刻反映到所有客户端。GitHub README 还会经过 Camo 图片代理，其刷新时间可能晚于源站。
+
+需要 README 定期反映仓库变化时，可在固定图片 URL 中加入 `fresh=1`。亮暗 `<picture>` 的所有图片 URL 应使用相同设置。独立实测中，该模式在仓库描述变化后约 29 分钟自然更新，无需 PURGE 或更换 URL；此结果是一次观测，不是更新时间保证。它仍受默认 30 分钟的 GitHub 数据新鲜期影响，不能强制立即拉取新数据。
 
 仓库不存在或为私有时，API 返回错误占位图，并通过 `X-Banner-Error` 说明原因。GitHub 暂时不可用时，服务优先使用有效期内的旧数据；没有可用数据时返回占位图。参数错误返回 `400`，服务繁忙可能返回 `503`。
 
@@ -249,6 +251,18 @@ pnpm typecheck:vercel
 ```
 
 `pnpm test` 包含单元测试、接口测试和视觉回归。新增模板可从 [模板目录](packages/templates/) 开始；API 位于 `apps/api`，预览页位于 `apps/playground`，渲染器位于 `packages/core`，GitHub 数据访问位于 `packages/providers`。
+
+构建镜像后，可运行独立容器验收：
+
+```bash
+docker build -t erika:local .
+node scripts/smoke-docker.mjs erika:local
+node scripts/acceptance-docker.mjs erika:local
+```
+
+验收脚本通过真实 HTTP 路由检查上游超时、限流、旧图降级、错误占位和恢复刷新，并测量首次出图、缓存请求、并发渲染与队列拒绝。测试使用隔离的固定上游，不访问真实 GitHub，也不向线上服务压测。报告、图片和容器日志保存在 `out/acceptance-*/`。内存数据为各批次结束后的采样，不能作为峰值；首次容器请求也不代表 Vercel 冷启动。
+
+远程复测数据与线上验收边界见 [运行时验收记录](docs/runtime-acceptance.md)。
 
 如果需要从 PSD 提取图层和文字样式，参考 [PSD 工具说明](packages/psd-toolkit/README.md)。
 

@@ -1,0 +1,61 @@
+# 运行时验收记录
+
+2026-10-02 对提交 `f781fd5f1ec17ce9b0c9c6dbf6322f5b44ed9fc9` 进行独立验收。此记录区分隔离容器结果、Vercel 平台结果和 GitHub Camo 自然刷新结果。
+
+## 隔离容器
+
+[远程验收工作流](https://github.com/Moemu/erika-acceptance/actions/runs/36953532475) 在 GitHub 托管的 Ubuntu Runner 上构建生产 Dockerfile，通过真实 HTTP 请求运行验收脚本。客户端使用 Node.js 22.23.3。镜像使用 Node.js 22；测试图为 1500 × 900 WebP，使用内置插画与固定公开仓库数据。
+
+上游替身只通过测试容器的 `NODE_OPTIONS` 加载。测试容器不设置 GitHub 令牌。生产代码和部署不加载该替身。为缩短故障窗口，测试将 Provider 新鲜期设为 100 毫秒，旧数据上限设为 10 秒；超时仍使用默认 5 秒。
+
+| 场景 | HTTP 结果 | 验收结果 |
+| --- | --- | --- |
+| 上游超时，有旧数据 | 200 图片，22 毫秒 | 图片哈希与故障前一致 |
+| 上游超时，无旧数据 | 200 占位图，约 5050 毫秒 | `X-Banner-Error: upstream-timeout` |
+| 上游 429，有旧数据 | 200 图片，19 毫秒 | 图片哈希与故障前一致 |
+| 配额暂停，无旧数据 | 200 占位图，52 毫秒 | `X-Banner-Error: upstream-rate-limited`；暂停期间不访问上游 |
+| 上游恢复 | 200 新图 | 两种故障均恢复；新图片哈希与故障前不同 |
+
+无旧数据时，占位图使用 60 秒 HTTP 缓存。测试结束时，渲染队列深度均为 0。
+
+## HTTP 负载
+
+负载测试使用同一隔离容器。Provider 新鲜期设为 1 小时，通过 `ERIKA_RENDER_CACHE_MB=2` 将渲染缓存上限设为 2 MiB，以观察缓存复用和淘汰。各批次结束后读取健康检查与 Docker 内存数据。
+
+| 场景 | 请求数 / 并发数 | 总耗时 | p50 / p95 | HTTP 结果 | 批次结束时内存 |
+| --- | --- | --- | --- | --- | --- |
+| 缓存图片 | 24 / 4 | 139 毫秒 | 21 / 28 毫秒 | 24 个 200 | 43.90 MiB |
+| 不同标题的新图 | 16 / 4 | 561 毫秒 | 129 / 149 毫秒 | 16 个 200 | 38.36 MiB |
+| 不同标题的突发请求 | 80 / 80 | 2321 毫秒 | 1254 / 2235 毫秒 | 72 个 200，8 个 503 | 77.67 MiB |
+
+拒绝的请求返回 `Retry-After: 5`。突发批次结束后，缓存保留 41 张图片，共 2,048,434 字节，低于 2 MiB 上限；队列回到 0。整个负载测试只访问仓库数据上游一次。缓存图片批次没有增加缓存条目。ETag 条件请求返回 304。
+
+新容器启动到健康检查成功约 242 毫秒，首次出图约 102 毫秒。健康检查在首次出图之前执行，因此这是首次渲染测量，不是未经请求的进程启动测量。
+
+这些结果只描述本次环境与有限样本。内存为批次结束后的采样，不能作为峰值。突发请求的分位数包含 503 响应。固定上游不包含真实 GitHub 网络延迟。这些数据不能直接作为生产容量或 Vercel 冷启动指标。
+
+## 外部仓库 Actions
+
+独立仓库 [Moemu/erika-acceptance](https://github.com/Moemu/erika-acceptance) 复制公开工作流示例，固定 Erika 工具版本为上述提交。工作流使用 GitHub 自动提供的 `GITHUB_TOKEN`，生成 `assets/banner.webp` 后按差异提交。
+
+- [首次运行](https://github.com/Moemu/erika-acceptance/actions/runs/36953478458) 成功，生成图片并产生 [机器人提交 cf2adde](https://github.com/Moemu/erika-acceptance/commit/cf2addefe8d329df4e4377cc3df64d51189f52e5)。
+- [数据未变时再次运行](https://github.com/Moemu/erika-acceptance/actions/runs/36953593721) 成功，仓库 HEAD 仍为 `cf2adde`，没有新增图片提交。
+- 定时入口设为每小时第 17 分钟。实际 `schedule` 事件另行观察，手动运行成功不等于定时触发已验收。
+
+## Vercel 与 Camo
+
+生产部署的 MAS 请求 `nh92n-1790905131847-36be52f1d446` 在平台日志中标记为 `Start Type: Hot`。执行时间 842 毫秒，峰值内存 246 MB，平台响应时间约 1.6 秒。此请求不作为冷启动证据。
+
+同一提交的独立预览部署 `dpl_2xg81tZpZeLBAMtVXBceyi13WAR4` 已就绪。首个 `/v1/meta` 请求 `9mvdx-1790906920406-fa969d967ce5` 被平台标记为 `Hot (prewarmed)`，执行 32 毫秒，平台响应 117 毫秒，峰值内存 212 MB。首次 Banner 请求标记为 `Hot`，执行 1.10 秒，平台响应 1.4 秒，峰值内存 269 MB。这些请求来自部署预览截图访问，不能作为真正 `Cold` 的样本。
+
+本机网络恢复后，预览部署的真实中文图片请求成功，标题与描述没有缺字。初期 TLS 连接重置记录属于客户端网络问题。[远程 HTTP 探测](https://github.com/Moemu/erika-acceptance/actions/runs/36955282704) 已执行；工作流成功只表示探测和报告保存完成，具体 HTTP 状态以报告为准。
+
+GitHub 实际暗色页面已选择 MAS 暗色 Camo 图片，图片成功加载，显示时钟图标与 `2026-10-01`。此前的匿名浏览器亮色页面已通过检查。
+
+新的自然刷新对照使用独立仓库的描述，从 fixture A 改为 fixture B。正常缓存与 `fresh=1` 各有亮暗两条固定 URL。2026-10-02 01:53:38 UTC 修改描述，未改动图片 URL，未执行 PURGE。
+
+`fresh=1` 暗色 Camo 在 02:22:33 UTC、亮色 Camo 在 02:22:47 UTC 均已显示 fixture B，与对应新源站字节一致。自然更新时间的观测上界分别约 28 分 55 秒、29 分 9 秒。此模式通过本次同 URL 自然刷新验收；一次观测不能构成服务时限保证。普通模式同期仍返回 fixture A；亮色源站为 CDN HIT，Age 1729 秒。普通模式尚未取得自然更新时间，只记录当时仍旧的下界。
+
+MAS README 已通过 [提交 5d2e44a](https://github.com/Moemu/Muika-After-Story/commit/5d2e44addab32bdbe08d2dae490276fd6fc1275c) 将两张图片统一改为 `fresh=1`。GitHub 实际暗色页面已显示 `2026-10-02`；亮暗源站与 Camo 均返回 `no-cache`，对应图片字节一致。这个选项只改变 HTTP 缓存验证，仍受 Provider 新鲜期与后台更新影响。
+
+完整 JSON 报告、测试图片和容器日志位于上述远程工作流的 `api-acceptance-report` 附件。本地复测结果保存到 `out/acceptance-*/`。

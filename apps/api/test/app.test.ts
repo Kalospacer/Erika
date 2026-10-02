@@ -6,6 +6,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { DEFAULT_TEMPLATES_DIR } from "@erika/core";
 import { LIMITS } from "@erika/shared";
+import { createCanvas, loadImage } from "@napi-rs/canvas";
 import { createApp } from "../src/app.js";
 import type { GitHubProvider, RepoSnapshot } from "@erika/providers";
 import { NotFoundError, UpstreamError } from "@erika/providers";
@@ -156,6 +157,35 @@ describe("GET /v1/banner", () => {
     expect(res.headers.get("content-type")).toBe("image/webp");
     const bytes = new Uint8Array(await res.arrayBuffer());
     expect(bytes.length).toBeGreaterThan(5_000);
+  });
+
+  it.each([
+    ["grokbot", "light", "en", "png"],
+    ["grokbot", "dark", "zh", "webp"],
+    ["avatar", "light", "zh", "webp"],
+    ["avatar", "dark", "en", "png"],
+  ])("not-found uses Erika artwork with %s, %s, %s and %s", async (template, theme, lang, format) => {
+    queue.push(new NotFoundError("No/Such"), new NotFoundError("No/Such"));
+    const url = `/v1/banner/No/Such/${template}.${format}?theme=${theme}&lang=${lang}&scale=0.2&icon=avatar&iconPath=assets/other.png`;
+    const res = await app.request(url);
+    expect(res.status).toBe(200);
+    expect(res.headers.get("x-banner-icon")).toBe("builtin");
+    expect(res.headers.get("x-banner-template")).toBe(template);
+    expect(res.headers.get("x-banner-preset")).toBe("0");
+    expect(res.headers.get("x-banner-error")).toBe("not-found");
+    const image = await loadImage(Buffer.from(await res.arrayBuffer()));
+    expect([image.width, image.height]).toEqual([600, 360]);
+    const canvas = createCanvas(image.width, image.height);
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(image, 0, 0);
+    const pixels = ctx.getImageData(0, 0, image.width / 2, image.height).data;
+    let sweatPixels = 0;
+    for (let i = 0; i < pixels.length; i += 4) {
+      if (pixels[i + 2] > pixels[i] + 40 && pixels[i + 1] > pixels[i] + 20) sweatPixels++;
+    }
+    expect(sweatPixels).toBeGreaterThan(10);
+    const cached = await app.request(url, { headers: { "If-None-Match": res.headers.get("etag")! } });
+    expect(cached.status).toBe(304);
   });
 
   it("rate limited without stale -> transient placeholder with short cache", async () => {

@@ -91,6 +91,10 @@ export function createApp(deps: ApiDeps) {
   const fontsDir = deps.fontsDir ?? join(templatesDir, "fonts");
   const builtinIconPath = deps.builtinIconPath ?? builtinIconPathFor(templatesDir);
   const themedBuiltinIconPath = deps.builtinIconPath ?? builtinIconPathFor(templatesDir, "light");
+  const notFoundIconPath = join(templatesDir, "assets", "erika-not-found.png");
+  const notFoundIcon = existsSync(notFoundIconPath) ? readFileSync(notFoundIconPath) : undefined;
+  const notFoundFingerprint = notFoundIcon ? sha256hex(notFoundIcon.toString("base64")).slice(0, 12) : "missing";
+  if (!notFoundIcon) log(`not-found illustration missing: ${notFoundIconPath}; using text placeholder`);
   // the default icon's *content* is part of the render cache key: replacing the
   // asset must invalidate cached renders (a constant "builtin" fingerprint would
   // keep serving the old artwork until the LRU evicted it)
@@ -240,7 +244,8 @@ export function createApp(deps: ApiDeps) {
 
     // ---- placeholder path (never a broken image) ----
     if (errorKind) {
-      const phKey = `ph:${errorKind}:${lang}:${q.scale}:${repoKey}:${template.id}:${template.version}:${q.theme ?? ""}:${format}`;
+      const placeholderIcon = errorKind === "not-found" ? notFoundIcon : undefined;
+      const phKey = `ph:${errorKind}:${lang}:${q.scale}:${repoKey}:${template.id}:${template.version}:${q.theme ?? ""}:${format}:${placeholderIcon ? notFoundFingerprint : ""}`;
       let ph: { bytes: Buffer; contentType: string };
       try {
         ph = await renderQueue.run(() =>
@@ -258,6 +263,7 @@ export function createApp(deps: ApiDeps) {
               },
               params: { scale: q.scale, theme: q.theme, meta: [] },
               fontDirs: [fontsDir],
+              iconOverride: placeholderIcon ? { buffer: placeholderIcon, kind: "builtin" } : undefined,
               format,
             });
             const stored = cache.set(phKey, res.buffer);
@@ -270,6 +276,9 @@ export function createApp(deps: ApiDeps) {
       }
       const etag = etagOf(ph.bytes);
       c.header("X-Banner-Error", errorKind);
+      c.header("X-Banner-Icon", placeholderIcon ? "builtin" : "none");
+      c.header("X-Banner-Template", template.id);
+      c.header("X-Banner-Preset", "0");
       c.header("Cache-Control", q.fresh ? CACHE_REVALIDATE : errorKind === "not-found" ? CACHE_NORMAL : CACHE_TRANSIENT);
       c.header("ETag", etag);
       if (c.req.header("If-None-Match") === etag) return c.body(null, 304);

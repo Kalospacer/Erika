@@ -4,16 +4,18 @@
 
 ## 内置插画
 
-根据维护者提供的生成来源，以下插画使用 OpenAI GPT-Image-2.5 生成：
+根据维护者提供的生成来源，默认插画使用 OpenAI GPT-Image-2.5 生成。透明版和表情变体使用内置 ImageGen 工具编辑，具体来源见下表：
 
 | 文件 | 用途或来源 |
 | --- | --- |
 | `packages/templates/assets/erika.webp` | Erika 默认插画（模板内置图标） |
 | `assets/erika-icon.webp` | Erika 仓库自身图标（Banner 左侧插画） |
 | `packages/templates/assets/erika-transparent.png`、`assets/erika-icon-transparent.png` | 原插画经 ImageGen 移除背景得到的透明衍生图，用于亮暗主题 |
+| `packages/templates/assets/erika-not-found.png` | 2026-10-02 使用内置 ImageGen 工具，以 Erika 透明插画为参考制作的冒汗表情变体，用于仓库不存在或已私有的占位图 |
 | `apps/playground/public/icon-192.png`、`icon-512.png`、`favicon.ico`、`favicon-32.png`、`apple-touch-icon.png` | 应用图标，由同一张透明底原图导出 |
 
 `tests/visual/baselines/erika-*.png`、`stranger-repo.png` 是上述插画的排版衍生图，沿用原素材的权利范围。
+`tests/visual/baselines/not-found-*.png` 是仓库未找到插画的亮暗主题及中英文排版衍生图，沿用同一权利范围。
 `tests/visual/baselines/avatar-zh-light.png` 使用测试脚本绘制的头像图形，按项目 MIT 许可证提供。
 
 对于上述素材中 Moemu 实际持有且有权授权的权利，Moemu 按 [MIT](LICENSE) 授权。

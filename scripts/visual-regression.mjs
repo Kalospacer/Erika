@@ -54,6 +54,14 @@ const cases = [
     data: { ...erika, licenseSpdxId: "MIT", language: "TypeScript", pushedAt: "2026-10-01T00:00:00Z" },
     asset: "erika-transparent.png", kind: "repo", params: { theme, meta: ["full_name", "license", "language", "last_updated"] },
   })),
+  ...["light", "dark"].flatMap((theme) => ["en", "zh"].map((lang) => ({
+    id: `not-found-${lang}-${theme}`, template: "grokbot",
+    data: {
+      fullName: "Example/Missing", name: "Example/Missing", private: false,
+      description: lang === "zh" ? "仓库不存在，或已转为私有。" : "Repository not found, or set to private.",
+    },
+    asset: "erika-not-found.png", kind: "builtin", params: { theme, meta: [] },
+  }))),
   {
     id: "metadata-long", template: "avatar",
     data: { ...stranger, licenseSpdxId: "GPL-3.0-or-later", language: "A very long language name with 中文字符", pushedAt: "2026-10-01T00:00:00Z" },

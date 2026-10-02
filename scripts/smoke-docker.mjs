@@ -69,6 +69,7 @@ try {
   const missing = await fetch(`${origin}/v1/banner/Example/Missing.webp`);
   assert.equal(missing.status, 200);
   assert.equal(missing.headers.get("x-banner-error"), "not-found");
+  assert.equal(missing.headers.get("x-banner-icon"), "builtin", "not-found illustration missing from image");
   assert.equal(missing.headers.get("content-type"), "image/webp");
   console.log("Docker smoke passed: static assets, nested SPA, API 404, repo icon, selected metadata, transparent themes, ETag, placeholder.");
 } catch (error) {
